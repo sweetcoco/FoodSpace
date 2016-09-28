@@ -64,6 +64,9 @@ class OnboardingViewController: UIViewController, UICollectionViewDataSource, UI
     }()
     
     let cellId = "cellId"
+    let loginCellId = "loginCellId"
+    
+    var loginCellisLogin: Bool = false
     
     
     
@@ -114,39 +117,50 @@ class OnboardingViewController: UIViewController, UICollectionViewDataSource, UI
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        observeKeyboardNotifications()
+        
         view.addSubview(collectionView)
         collectionView.anchorToTop(top: view.topAnchor, left: view.leftAnchor, bottom: view.bottomAnchor, right: view.rightAnchor)
         
-        collectionView.register(OnboardingPageCell.self, forCellWithReuseIdentifier: cellId)
-        collectionView.register(UICollectionViewCell.self, forCellWithReuseIdentifier: "loginCell")
+        registerCells()
         
         setupViews()
         
-        skipButtonView.addTarget(self, action: #selector(presentSignupController), for: .touchUpInside)
-        loginButtonView.addTarget(self, action: #selector(presentLoginController), for: .touchUpInside)
+        skipButtonView.addTarget(self, action: #selector(skipButtonClicked), for: .touchUpInside)
+        loginButtonView.addTarget(self, action: #selector(loginButtonClicked), for: .touchUpInside)
         
     }
     
-    func presentSignupController() {
-        let signupController = SignupController();
+    func skipButtonClicked() {
+        let indexPath = IndexPath(item: onboardingPages.count, section: 0)
+        collectionView.scrollToItem(at: indexPath, at: .centeredHorizontally, animated: true)
         
-        let transition = CATransition()
-        transition.duration = 0.5
-        transition.type = kCATransitionPush
-        transition.subtype = kCATransitionFromRight
-        view.window!.layer.add(transition, forKey: kCATransition)
-        present(signupController, animated: false, completion: nil)
+        loginCellisLogin = false
+        
+        moveControlConstraintsOffScreen()
+        
+        UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 1, initialSpringVelocity: 1, options: .curveEaseOut, animations: {
+            self.view.layoutIfNeeded()
+            }, completion: nil)
+        
     }
     
-    func presentLoginController() {
-        let loginController = LoginController();
+    func loginButtonClicked() {
+        let indexPath = IndexPath(item: onboardingPages.count, section: 0)
+        collectionView.scrollToItem(at: indexPath, at: .centeredHorizontally, animated: true)
         
-        let transition = CATransition()
-        transition.duration = 0.5
-        transition.type = kCATransitionPush
-        transition.subtype = kCATransitionFromRight
-        view.window!.layer.add(transition, forKey: kCATransition)
-        present(loginController, animated: false, completion: nil)
+        loginCellisLogin = true
+        
+        moveControlConstraintsOffScreen()
+        
+        UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 1, initialSpringVelocity: 1, options: .curveEaseOut, animations: {
+            self.view.layoutIfNeeded()
+            }, completion: nil)
+    }
+    
+    fileprivate func registerCells() {
+        collectionView.register(OnboardingPageCell.self, forCellWithReuseIdentifier: cellId)
+        collectionView.register(LoginCell.self, forCellWithReuseIdentifier: loginCellId)
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
@@ -154,59 +168,108 @@ class OnboardingViewController: UIViewController, UICollectionViewDataSource, UI
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        
+        if indexPath.item == onboardingPages.count {
+            let loginCell = collectionView.dequeueReusableCell(withReuseIdentifier: loginCellId, for: indexPath) as! LoginCell
+            loginCell.isLogin = loginCellisLogin
+            loginCell.parent = self
+            return loginCell
+        }
+        
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellId, for: indexPath as IndexPath) as! OnboardingPageCell
         
-        if indexPath.item < onboardingPages.count {
-            let onboardingPage = onboardingPages[indexPath.item]
-            
-            cell.page = onboardingPage
+        let onboardingPage = onboardingPages[indexPath.item]
+        cell.page = onboardingPage
         
-            return cell
-        }
-        
-        let loginCell = collectionView.dequeueReusableCell(withReuseIdentifier: "loginCell", for: indexPath as IndexPath)
-        
-        return loginCell
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
-        print(indexPath.item)
-        if indexPath.item >= onboardingPages.count {
-            presentSignupController()
-        }
+        return cell
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         return CGSize(width: view.frame.width, height: view.frame.height)
     }
     
-    func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
-        let pageWidth = scrollView.frame.width
-        pageControl.currentPage = Int(collectionView.contentOffset.x / pageWidth)
-    }
+    var pageControlBottomAnchor: NSLayoutConstraint?
+    var skipButtonBottomAnchor: NSLayoutConstraint?
+    var loginButtonBottomAnchor: NSLayoutConstraint?
     
     func setupViews() {
-        view.addSubview(buttonsView)
+        view.addSubview(pageControl)
         
-        buttonsView.addSubview(skipButtonView)
-        buttonsView.addSubview(loginButtonView)
+        view.addSubview(skipButtonView)
+        view.addSubview(loginButtonView)
         
-        buttonsView.addSubview(pageControl)
+        skipButtonBottomAnchor = skipButtonView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -30)
+        skipButtonBottomAnchor?.isActive = true
+        skipButtonView.leftAnchor.constraint(equalTo: view.leftAnchor, constant: 24).isActive = true
         
-        buttonsView.anchorToTop(top: nil, left: view.leftAnchor, bottom: view.bottomAnchor, right: view.rightAnchor)
-        buttonsView.heightAnchor.constraint(equalTo: view.heightAnchor, multiplier: 0.15).isActive = true
+        loginButtonBottomAnchor = loginButtonView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -30)
+        loginButtonBottomAnchor?.isActive = true
+        loginButtonView.rightAnchor.constraint(equalTo: view.rightAnchor, constant: -24).isActive = true
         
-        skipButtonView.centerYAnchor.constraint(equalTo: buttonsView.centerYAnchor).isActive = true
-        skipButtonView.leftAnchor.constraint(equalTo: buttonsView.leftAnchor, constant: 24).isActive = true
+        pageControlBottomAnchor = pageControl.anchor(nil, left: view.leftAnchor, bottom: view.bottomAnchor, right: view.rightAnchor, topConstant: 0, leftConstant: 0, bottomConstant: 60, rightConstant: 0, widthConstant: 0, heightConstant: 40)[1]
+    }
+    
+    fileprivate func observeKeyboardNotifications() {
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardShow), name: .UIKeyboardWillShow, object: nil)
         
-        loginButtonView.centerYAnchor.constraint(equalTo: buttonsView.centerYAnchor).isActive = true
-        loginButtonView.rightAnchor.constraint(equalTo: buttonsView.rightAnchor, constant: -24).isActive = true
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardHide), name: .UIKeyboardWillHide, object: nil)
+    }
+    
+    func keyboardShow() {
+        UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 1, initialSpringVelocity: 1, options: .curveEaseOut, animations: {
+            
+            self.view.frame = CGRect(x: 0, y: -80, width: self.view.frame.width, height: self.view.frame.height)
+            
+            }, completion: nil)
+    }
+    
+    func keyboardHide() {
+        UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 1, initialSpringVelocity: 1, options: .curveEaseOut, animations: {
+            
+            self.view.frame = CGRect(x: 0, y: 0, width: self.view.frame.width, height: self.view.frame.height)
+            
+            }, completion: nil)
+    }
+    
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        view.endEditing(true)
+    }
+    
+    func scrollViewWillEndDragging(_ scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>) {
         
-        pageControl.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
-        pageControl.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: 180).isActive = true
-        pageControl.heightAnchor.constraint(equalToConstant: 20).isActive = true
-        pageControl.widthAnchor.constraint(equalToConstant: 50).isActive = true
+        let pageNumber = Int(targetContentOffset.pointee.x / view.frame.width)
+        pageControl.currentPage = pageNumber
+        
+        //we are on the last page
+        if pageNumber == onboardingPages.count {
+            moveControlConstraintsOffScreen()
+        } else {
+            //back on regular pages
+            pageControlBottomAnchor?.constant = -60
+            skipButtonBottomAnchor?.constant = -30
+            loginButtonBottomAnchor?.constant = -30
+        }
+        
+        UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 1, initialSpringVelocity: 1, options: .curveEaseOut, animations: {
+            self.view.layoutIfNeeded()
+            }, completion: nil)
+        
+    }
+    
+    fileprivate func moveControlConstraintsOffScreen() {
+        pageControlBottomAnchor?.constant = 140
+        skipButtonBottomAnchor?.constant = 140
+        loginButtonBottomAnchor?.constant = 140
     }
 
 }
+
+
+
+
+
+
+
+
+
 

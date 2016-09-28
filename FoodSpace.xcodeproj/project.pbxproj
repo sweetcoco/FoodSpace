@@ -35,12 +35,11 @@
 		705233761D8DD9CB00481E13 /* BaseCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 705233751D8DD9CB00481E13 /* BaseCell.swift */; };
 		705233781D8E402600481E13 /* UITextViewExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 705233771D8E402600481E13 /* UITextViewExtension.swift */; };
 		70917CC51D8C85B600F3D9EF /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 70917CC41D8C85B600F3D9EF /* GoogleService-Info.plist */; };
-		7099B35B1D8A5F9900340C1B /* SignupController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7099B35A1D8A5F9900340C1B /* SignupController.swift */; };
 		7099B35D1D8A6E3000340C1B /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 7099B35C1D8A6E3000340C1B /* Main.storyboard */; };
 		7099B35F1D8A6F7200340C1B /* UIColorExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7099B35E1D8A6F7200340C1B /* UIColorExtension.swift */; };
-		7099B3611D8A812100340C1B /* LoginController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7099B3601D8A812100340C1B /* LoginController.swift */; };
 		70E6A01A1D8ED870004A390C /* SettingsController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70E6A0191D8ED870004A390C /* SettingsController.swift */; };
 		70E6A01E1D9B3C0D004A390C /* BaseTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70E6A01D1D9B3C0D004A390C /* BaseTextView.swift */; };
+		70E6A0201D9B5E73004A390C /* LoginCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70E6A01F1D9B5E73004A390C /* LoginCell.swift */; };
 		9AE3194AC771470EF2D42DC2 /* Pods_FoodSpaceUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 34258DAD35DBE74A454C0C0E /* Pods_FoodSpaceUITests.framework */; };
 /* End PBXBuildFile section */
 
@@ -100,12 +99,11 @@
 		705233751D8DD9CB00481E13 /* BaseCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BaseCell.swift; sourceTree = "<group>"; };
 		705233771D8E402600481E13 /* UITextViewExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UITextViewExtension.swift; sourceTree = "<group>"; };
 		70917CC41D8C85B600F3D9EF /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
-		7099B35A1D8A5F9900340C1B /* SignupController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SignupController.swift; sourceTree = "<group>"; };
 		7099B35C1D8A6E3000340C1B /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = Main.storyboard; path = "../../FoodSpace Alpha/FoodSpace/Main.storyboard"; sourceTree = "<group>"; };
 		7099B35E1D8A6F7200340C1B /* UIColorExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIColorExtension.swift; sourceTree = "<group>"; };
-		7099B3601D8A812100340C1B /* LoginController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoginController.swift; sourceTree = "<group>"; };
 		70E6A0191D8ED870004A390C /* SettingsController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SettingsController.swift; sourceTree = "<group>"; };
 		70E6A01D1D9B3C0D004A390C /* BaseTextView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BaseTextView.swift; sourceTree = "<group>"; };
+		70E6A01F1D9B5E73004A390C /* LoginCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoginCell.swift; sourceTree = "<group>"; };
 		B2948A9D5A4BE8CF0B5761CC /* Pods-FoodSpaceTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-FoodSpaceTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-FoodSpaceTests/Pods-FoodSpaceTests.release.xcconfig"; sourceTree = "<group>"; };
 		C346FD4BF5A05A0B4D1225D2 /* Pods_FoodSpaceTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_FoodSpaceTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		DBCC67CA48B775DE15387155 /* Pods-FoodSpaceUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-FoodSpaceUITests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-FoodSpaceUITests/Pods-FoodSpaceUITests.debug.xcconfig"; sourceTree = "<group>"; };
@@ -250,8 +248,7 @@
 			children = (
 				704E883B1D88E05E00990DFE /* OnboardingViewController.swift */,
 				704E886D1D88E63000990DFE /* OnboardingPageCell.swift */,
-				7099B3601D8A812100340C1B /* LoginController.swift */,
-				7099B35A1D8A5F9900340C1B /* SignupController.swift */,
+				70E6A01F1D9B5E73004A390C /* LoginCell.swift */,
 			);
 			name = external;
 			sourceTree = "<group>";
@@ -563,13 +560,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				7052336E1D8DB9B000481E13 /* User.swift in Sources */,
-				7099B3611D8A812100340C1B /* LoginController.swift in Sources */,
 				705233741D8DD22A00481E13 /* MenuBar.swift in Sources */,
 				704E88811D89038C00990DFE /* ColorPalette.swift in Sources */,
 				704E883C1D88E05E00990DFE /* OnboardingViewController.swift in Sources */,
 				704E886E1D88E63000990DFE /* OnboardingPageCell.swift in Sources */,
 				704E88421D88E05E00990DFE /* FoodSpace.xcdatamodeld in Sources */,
 				704E886C1D88E23F00990DFE /* UIViewExtension.swift.swift in Sources */,
+				70E6A0201D9B5E73004A390C /* LoginCell.swift in Sources */,
 				704E883A1D88E05E00990DFE /* AppDelegate.swift in Sources */,
 				704E88711D88EA3100990DFE /* OnboardingPage.swift in Sources */,
 				705233701D8DC2F900481E13 /* MealPlan.swift in Sources */,
@@ -581,7 +578,6 @@
 				70E6A01A1D8ED870004A390C /* SettingsController.swift in Sources */,
 				705233781D8E402600481E13 /* UITextViewExtension.swift in Sources */,
 				704E88871D89193300990DFE /* UIImageExtension.swift in Sources */,
-				7099B35B1D8A5F9900340C1B /* SignupController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
