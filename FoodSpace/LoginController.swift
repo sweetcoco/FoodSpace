@@ -9,11 +9,10 @@
 import UIKit
 import Firebase
 
-class SignupController: UIViewController {
+class LoginController: UIViewController {
     
     let titleView: BaseTextView = {
         let tv = BaseTextView()
-        tv.textAlignment = .center
         return tv
     }()
     
@@ -24,7 +23,7 @@ class SignupController: UIViewController {
         return view
     }()
     
-    let loginRegisterButton: UIButton = {
+    lazy var loginRegisterButton: UIButton = {
         let button = UIButton()
         let highlightedBackgroundImage = UIImage.fromColor(color: UIColor(red: 1, green: 1, blue: 1, alpha: 0.2))
         button.backgroundColor = ColorPalette.BrandGreen
@@ -39,52 +38,33 @@ class SignupController: UIViewController {
         return button
     }()
     
-    func handleRegister() {
-        guard let email = emailTextField.text, let password = passwordTextField.text, let name = nameTextField.text else {
+    func handleLogin() {
+        guard let email = emailTextField.text, let password = passwordTextField.text else {
+            print("Form is not valid")
             return
         }
         
-        FIRAuth.auth()?.createUser(withEmail: email, password: password, completion: { (user, error) in
+        FIRAuth.auth()?.signIn(withEmail: email, password: password, completion: { (user, error) in
             
             if error != nil {
                 print(error)
                 return
             }
-            //successfully registered the user
             
-            // get their user id
-            guard let uid = user?.uid else {
-                return
-            }
-            
-            // get database connection
-            let ref = FIRDatabase.database().reference()
-            
-            // get or create "users" table, get or create a record as the user id
-            let userReference = ref.child("users").child(uid)
-            // these will be columns in the record
-            let values = ["name": name, "email": email]
-            
-            // write it to the db
-            userReference.updateChildValues(values, withCompletionBlock: { (err, ref) in
-                if err != nil {
-                    print(err)
-                }
+            // successfully logged in our user
+            // find the lowest view, and dismiss it. this will dismiss all the children too.
+            var vc: UIViewController = self
+            while ((vc.presentingViewController) != nil) {
+                vc = vc.presentingViewController!
                 
-                print("Saved user successfully into Firebase db")
-                // find the lowest view, and dismiss it. this will dismiss all the children too.
-                var vc: UIViewController = self
-                while ((vc.presentingViewController) != nil) {
-                    vc = vc.presentingViewController!
-                    
-                    if let ovc = vc as? OnboardingViewController {
-                        ovc.homeController?.fetchUserAndSetupNavBarTitle()
-                    }
+                if let ovc = vc as? OnboardingViewController {
+                    ovc.homeController?.fetchUserAndSetupNavBarTitle()
                 }
-                vc.dismiss(animated: false, completion: nil)
-            })
+            }
+            vc.dismiss(animated: false, completion: nil)
             
         })
+        
     }
     
     func presentHomeView() {
@@ -97,19 +77,6 @@ class SignupController: UIViewController {
         view.window!.layer.add(transition, forKey: kCATransition)
         present(homeController, animated: false, completion: nil)
     }
-    
-    let nameTextField: UITextField = {
-        let tf = UITextField()
-        tf.placeholder = "name"
-        tf.layer.sublayerTransform = CATransform3DMakeTranslation(10, 0, 0)
-        tf.translatesAutoresizingMaskIntoConstraints = false
-        tf.font = UIFont(name: "Lato-Light", size: 20)
-        tf.layer.cornerRadius = 3
-        tf.layer.masksToBounds = true
-        tf.layer.borderColor = ColorPalette.BrandGreen.cgColor
-        tf.layer.borderWidth = 1
-        return tf
-    }()
     
     let emailTextField: UITextField = {
         let tf = UITextField()
@@ -144,12 +111,12 @@ class SignupController: UIViewController {
         return view
     }()
     
-    let loginButtonView: UIButton = {
+    let signupButtonView: UIButton = {
         let button = UIButton()
         let highlightedBackgroundImage = UIImage.fromColor(color: UIColor(red: 1, green: 1, blue: 1, alpha: 0.2))
         button.backgroundColor = UIColor.clear
         button.titleLabel!.font =  UIFont(name: "Lato-Light", size: 25)
-        button.setTitle("login", for: .normal)
+        button.setTitle("sign up", for: .normal)
         button.setTitleColor(ColorPalette.BrandGreen, for: .normal)
         button.setBackgroundImage(highlightedBackgroundImage, for: .highlighted)
         button.contentEdgeInsets = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
@@ -158,10 +125,10 @@ class SignupController: UIViewController {
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+
         view.backgroundColor = UIColor.white
         
         createTitle()
@@ -174,14 +141,14 @@ class SignupController: UIViewController {
         setupInputsContainerView()
         setupTitleView()
         setupLoginRegisterButton()
-        setupLoginButtonView()
+        setupSignupButtonView()
         
-        loginButtonView.addTarget(self, action: #selector(presentLoginController), for: .touchUpInside)
-        loginRegisterButton.addTarget(self, action: #selector(handleRegister), for: .touchUpInside)
+        signupButtonView.addTarget(self, action: #selector(presentSignupController), for: .touchUpInside)
+        loginRegisterButton.addTarget(self, action: #selector(handleLogin), for: .touchUpInside)
     }
     
     func createTitle() {
-        let attributedText = UIView().thinBoldThinAttributedString(thin: "create ", bold: "your space", secondThin: nil, size: 40, color: ColorPalette.BrandGreen)
+        let attributedText = UIView().thinBoldThinAttributedString(thin: "enter ", bold: "your space", secondThin: nil, size: 40, color: ColorPalette.BrandGreen)
         
         let paragraphStyle = NSMutableParagraphStyle()
         paragraphStyle.alignment = .center
@@ -192,8 +159,8 @@ class SignupController: UIViewController {
         titleView.attributedText = attributedText
     }
     
-    func presentLoginController() {
-        let loginController = LoginController();
+    func presentSignupController() {
+        let signupController = SignupController();
         
         let transition = CATransition()
         transition.duration = 0.3
@@ -201,7 +168,7 @@ class SignupController: UIViewController {
         transition.subtype = kCATransitionFromLeft
         view.window!.layer.add(transition, forKey: kCATransition)
         
-        present(loginController, animated: false, completion: nil)
+        present(signupController, animated: false, completion: nil)
     }
     
     func setupInputsContainerView() {
@@ -211,21 +178,16 @@ class SignupController: UIViewController {
         inputsContainerView.widthAnchor.constraint(equalTo: view.widthAnchor, constant: -50).isActive = true
         inputsContainerView.heightAnchor.constraint(equalToConstant: 150).isActive = true
         
-        inputsContainerView.addSubview(nameTextField)
         inputsContainerView.addSubview(emailTextField)
         inputsContainerView.addSubview(passwordTextField)
         
         //need x, y, width, height constraints
-        nameTextField.anchorToTop(top: inputsContainerView.topAnchor, left: inputsContainerView.leftAnchor, bottom: nil, right: inputsContainerView.rightAnchor)
-        nameTextField.heightAnchor.constraint(equalToConstant: 45).isActive = true
-        
-        //need x, y, width, height constraints
-        emailTextField.anchorToTop(top: nil, left: inputsContainerView.leftAnchor, bottom: nil, right: inputsContainerView.rightAnchor)
-        emailTextField.centerYAnchor.constraint(equalTo: inputsContainerView.centerYAnchor).isActive = true
+        emailTextField.anchorToTop(top: inputsContainerView.topAnchor, left: inputsContainerView.leftAnchor, bottom: nil, right: inputsContainerView.rightAnchor)
         emailTextField.heightAnchor.constraint(equalToConstant: 45).isActive = true
         
         //need x, y, width, height constraints
-        passwordTextField.anchorToTop(top: nil, left: inputsContainerView.leftAnchor, bottom: inputsContainerView.bottomAnchor, right: inputsContainerView.rightAnchor)
+        passwordTextField.anchorToTop(top: nil, left: inputsContainerView.leftAnchor, bottom: nil, right: inputsContainerView.rightAnchor)
+        passwordTextField.centerYAnchor.constraint(equalTo: inputsContainerView.centerYAnchor).isActive = true
         passwordTextField.heightAnchor.constraint(equalToConstant: 45).isActive = true
     }
     
@@ -242,13 +204,14 @@ class SignupController: UIViewController {
         //loginRegisterButton.heightAnchor.constraintEqualToConstant(50).active = true
     }
     
-    func setupLoginButtonView() {
+    func setupSignupButtonView() {
         buttonsView.anchorToTop(top: nil, left: view.leftAnchor, bottom: view.bottomAnchor, right: view.rightAnchor)
         buttonsView.heightAnchor.constraint(equalTo: view.heightAnchor, multiplier: 0.15).isActive = true
         
-        buttonsView.addSubview(loginButtonView)
+        buttonsView.addSubview(signupButtonView)
         
-        loginButtonView.centerYAnchor.constraint(equalTo: buttonsView.centerYAnchor).isActive = true
-        loginButtonView.rightAnchor.constraint(equalTo: buttonsView.rightAnchor, constant: -24).isActive = true
+        signupButtonView.centerYAnchor.constraint(equalTo: buttonsView.centerYAnchor).isActive = true
+        signupButtonView.rightAnchor.constraint(equalTo: buttonsView.rightAnchor, constant: -24).isActive = true
     }
+
 }

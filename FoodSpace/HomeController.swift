@@ -11,12 +11,8 @@ import Firebase
 
 class HomeController: UIViewController, UICollectionViewDataSource, UICollectionViewDelegate, UICollectionViewDelegateFlowLayout {
     
-    let titleView: UITextView = {
-        let tv = UITextView()
-        tv.isEditable = false
-        tv.backgroundColor = UIColor.clear
-        tv.translatesAutoresizingMaskIntoConstraints = false
-        tv.isScrollEnabled = false
+    let titleView: BaseTextView = {
+        let tv = BaseTextView()
         return tv
     }()
     

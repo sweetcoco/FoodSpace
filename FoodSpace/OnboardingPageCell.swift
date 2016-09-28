@@ -38,11 +38,8 @@ class OnboardingPageCell: BaseCell {
         }
     }
     
-    let titleView: UITextView = {
-        let tv = UITextView()
-        tv.isEditable = false
-        tv.backgroundColor = UIColor.clear
-        tv.translatesAutoresizingMaskIntoConstraints = false
+    let titleView: BaseTextView = {
+        let tv = BaseTextView()
         return tv
     }()
     
@@ -56,11 +53,8 @@ class OnboardingPageCell: BaseCell {
         return iv
     }()
     
-    let messageView: UITextView = {
-        let tv = UITextView()
-        tv.isEditable = false
-        tv.backgroundColor = UIColor.clear
-        tv.translatesAutoresizingMaskIntoConstraints = false
+    let messageView: BaseTextView = {
+        let tv = BaseTextView()
         return tv
     }()
     

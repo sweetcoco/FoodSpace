@@ -31,27 +31,23 @@ class MealPlanCell: BaseCell {
         }
     }
     
-    let titleView: UITextView = {
-        let tv = UITextView()
-        tv.font = UIFont(name: "Lato-Regular", size: 23)
-        tv.backgroundColor = .clear
+    let titleView: BaseTextView = {
+        let tv = BaseTextView()
+        tv.font = BaseTextView.Fonts.mediumRegularFont
         tv.textColor = .white
         return tv
     }()
     
-    let recipeIngredientCountView: UITextView = {
-        let tv = UITextView()
-        tv.font = UIFont(name: "Lato-Regular", size: 14)
-        tv.isScrollEnabled = false
-        tv.backgroundColor = .clear
+    let recipeIngredientCountView: BaseTextView = {
+        let tv = BaseTextView()
+        tv.font = BaseTextView.Fonts.smallRegularFont
         tv.textColor = .white
         return tv
     }()
     
-    let prepTimeView: UITextView = {
-        let tv = UITextView()
-        tv.font = UIFont(name: "Lato-Regular", size: 14)
-        tv.backgroundColor = .clear
+    let prepTimeView: BaseTextView = {
+        let tv = BaseTextView()
+        tv.font = BaseTextView.Fonts.smallRegularFont
         tv.textColor = .white
         return tv
     }()
