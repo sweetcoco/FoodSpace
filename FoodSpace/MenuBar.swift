@@ -33,7 +33,7 @@ class MenuBar : UIView, UICollectionViewDataSource, UICollectionViewDelegate, UI
     }()
     
     let cellId = "cellId"
-    let imageNames = ["HOME", "PEN", "quickaction", "CHECKLIST", "SETTINGS"]
+    let imageNames = ["home", "recipe", "quickaction", "grocery-list", "settings"]
     
     
     
@@ -60,7 +60,12 @@ class MenuBar : UIView, UICollectionViewDataSource, UICollectionViewDelegate, UI
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellId, for: indexPath) as! MenuCell
         
         if indexPath.item != 2 {
-            cell.imageView.image = UIImage(named: imageNames[indexPath.item])?.withRenderingMode(.alwaysTemplate)
+            cell.imageName = "\(imageNames[indexPath.item])"
+            cell.highlightedImageName = "\(imageNames[indexPath.item])-selected"
+            
+            let image: String = (indexPath.item == currentMenuIndex! ? cell.highlightedImageName : cell.imageName)!
+            
+            cell.imageView.image = UIImage(named: image)
         } else {
             cell.imageView.image = UIImage(named: imageNames[indexPath.item])
         }
@@ -95,6 +100,10 @@ class MenuBar : UIView, UICollectionViewDataSource, UICollectionViewDelegate, UI
             appDelegate.setNewRootView(newViewController: HomeController(), oldViewController: currentController)
         }
         
+        if (indexPath.item == 1 && currentIndex != 1) {
+            appDelegate.setNewRootView(newViewController: RecipesController(), oldViewController: currentController)
+        }
+        
         if (indexPath.item == 4 && currentIndex != 4) {
             appDelegate.setNewRootView(newViewController: SettingsController(), oldViewController: currentController)
         }
@@ -112,6 +121,9 @@ class MenuBar : UIView, UICollectionViewDataSource, UICollectionViewDelegate, UI
 
 
 class MenuCell: BaseCell {
+    
+    var highlightedImageName: String?
+    var imageName: String?
     
     var index: Int? {
         didSet {
@@ -136,20 +148,32 @@ class MenuCell: BaseCell {
     
     override var isHighlighted: Bool {
         didSet {
-            // change to white icon.
+            // change to green icon.
             if index != 2 {
-                self.backgroundColor = isHighlighted ? ColorPalette.BrandWhite : UIColor.clear
-                imageView.tintColor = isHighlighted ? ColorPalette.BrandLightGrey : ColorPalette.BrandWhite
+                guard let highlightedImageName = self.highlightedImageName else {
+                    return
+                }
+                
+                guard let imageName = self.imageName else {
+                    return
+                }
+                imageView.image = isSelected ? UIImage(named: highlightedImageName) : UIImage(named: imageName)
             }
         }
     }
     
     override var isSelected: Bool {
         didSet {
-            // change to white icon.
+            // change to green icon.
             if index != 2 {
-                self.backgroundColor = isSelected ? ColorPalette.BrandWhite : UIColor.clear
-                imageView.tintColor = isSelected ? ColorPalette.BrandLightGrey : ColorPalette.BrandWhite
+                guard let highlightedImageName = self.highlightedImageName else {
+                    return
+                }
+                
+                guard let imageName = self.imageName else {
+                    return
+                }
+                imageView.image = isSelected ? UIImage(named: highlightedImageName) : UIImage(named: imageName)
             }
         }
     }

@@ -19,7 +19,8 @@ class BaseTextView: UITextView {
     private struct FontSize {
         static let large: CGFloat = 30
         static let medium: CGFloat = 23
-        static let small: CGFloat = 14
+        static let small: CGFloat = 18
+        static let extraSmall: CGFloat = 14
     }
     
     public struct Fonts {
@@ -34,6 +35,10 @@ class BaseTextView: UITextView {
         static let smallLightFont = UIFont(name: FontFamily.light, size: FontSize.small)
         static let smallRegularFont = UIFont(name: FontFamily.regular, size: FontSize.small)
         static let smallBoldFont = UIFont(name: FontFamily.bold, size: FontSize.small)
+        
+        static let extraSmallLightFont = UIFont(name: FontFamily.light, size: FontSize.extraSmall)
+        static let extraSmallRegularFont = UIFont(name: FontFamily.regular, size: FontSize.extraSmall)
+        static let extraSmallBoldFont = UIFont(name: FontFamily.bold, size: FontSize.extraSmall)
     }
     
     

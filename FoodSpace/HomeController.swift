@@ -107,12 +107,12 @@ class HomeController: UIViewController, UICollectionViewDataSource, UICollection
     lazy var menuBar: MenuBar = {
         let mb = MenuBar()
         mb.currentViewController = self
-        mb.currentMenuIndex = 0
         return mb
     }()
     
     private func setupMenuBar() {
         view.addSubview(menuBar)
+        menuBar.currentMenuIndex = 0
         
         
         menuBar.anchorToTop(top: nil, left: view.leftAnchor, bottom: view.bottomAnchor, right: view.rightAnchor)
