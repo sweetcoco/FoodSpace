@@ -9,7 +9,7 @@
 import UIKit
 import Firebase
 
-class NewRecipeController: UITableViewController {
+class OLDNewRecipeController: UITableViewController {
     
     // ingredients the user has selected
     var ingredients = [Ingredient]()
@@ -59,6 +59,10 @@ class NewRecipeController: UITableViewController {
         navigationItem.leftBarButtonItem?.setTitleTextAttributes([
             NSForegroundColorAttributeName : UIColor.white], for: .normal)
         
+        navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Done", style: .plain, target: self, action: #selector(handleDone))
+        navigationItem.rightBarButtonItem?.setTitleTextAttributes([
+            NSForegroundColorAttributeName : UIColor.white], for: .normal)
+        
         navigationItem.title = "Recipes"
         
         navigationController?.navigationBar.titleTextAttributes = [
@@ -105,17 +109,20 @@ class NewRecipeController: UITableViewController {
         
         let numberOfRows = ingredients.count
         
+        let emptyLabel = UILabel(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: view.frame.height))
+        emptyLabel.font = BaseTextView.Fonts.mediumRegularFont
+        emptyLabel.textColor = ColorPalette.BrandLightGrey
+        emptyLabel.numberOfLines = 2
+        emptyLabel.textAlignment = .center
+        
+        tableView.backgroundView = emptyLabel
+        tableView.separatorStyle = .none
+        
         if numberOfRows == 0 {
-            let emptyLabel = UILabel(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: view.frame.height))
             emptyLabel.text = "Begin Searching for\nIngredients"
-            emptyLabel.font = BaseTextView.Fonts.mediumRegularFont
-            emptyLabel.textColor = ColorPalette.BrandLightGrey
-            emptyLabel.numberOfLines = 2
-            emptyLabel.textAlignment = .center
-            self.tableView.backgroundView = emptyLabel
-            self.tableView.separatorStyle = .none
             return 0
         } else {
+            emptyLabel.text = "Use the search to add more\nor tap Done if completed"
             return numberOfRows
         }
         
@@ -124,6 +131,7 @@ class NewRecipeController: UITableViewController {
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: cellId, for: indexPath) as! NewRecipeIngredientCell
+        cell.accessoryType = .disclosureIndicator
         
         let ingredient: Ingredient
         ingredient = ingredients[indexPath.row]
@@ -260,7 +268,7 @@ class NewRecipeController: UITableViewController {
                             if let searchResultsController: NewRecipeIngredientsSearchResultsController = self.searchController.searchResultsController as! NewRecipeIngredientsSearchResultsController? {
                                 
                                 searchResultsController.ingredients = self.filteredIngredients
-                                searchResultsController.newRecipeController = self
+                                //searchResultsController.newRecipeController = self
                             }
                             
                         } // hitsDictionary
@@ -275,11 +283,105 @@ class NewRecipeController: UITableViewController {
         self.searchController.searchResultsController?.view.removeObserver(self, forKeyPath: "hidden", context: nil)
         dismiss(animated: true, completion: nil)
     }
+    
+    func handleDone() {
+        let alertController = UIAlertController(title: "Name your recipe", message: "Click OK when done", preferredStyle: .alert)
+        
+        alertController.addTextField { (recipeNameField: UITextField) in
+            recipeNameField.placeholder = "example: Three Bean Taco Salad"
+        }
+        
+        let cancel = UIAlertAction(title: "Cancel", style: .cancel) { (cancelAction: UIAlertAction) in
+            print("cancel")
+        }
+        
+        let ok = UIAlertAction(title: "OK", style: .default) { (okAction: UIAlertAction) in
+            guard let recipeName = alertController.textFields?.first?.text else {
+                return
+            }
+            
+            self.saveRecipe(recipeName: recipeName)
+        }
+        
+        alertController.addAction(cancel)
+        alertController.addAction(ok)
+        
+        present(alertController, animated: true, completion: nil)
+    }
+    
+    func saveRecipe(recipeName: String) {
+        if recipeName.characters.count < 1 {
+            return handleDone()
+        }
+        
+        guard let userId = FIRAuth.auth()?.currentUser?.uid else {
+            return
+        }
+        
+        var newIngredients = [[String: Any]]()
+        
+        for ingredient in ingredients {
+            var values = [String: Any]()
+            
+            if let name = ingredient.name {
+                values["name"] = name
+            }
+            
+            if let category = ingredient.category {
+                values["category"] = category
+            }
+            
+            if let unit = ingredient.unit {
+                values["unit"] = unit
+            }
+            
+            if let quantity = ingredient.quantity {
+                values["quantity"] = quantity
+            }
+            
+            if let method = ingredient.method {
+                values["method"] = method
+            }
+            
+            if let ndbno = ingredient.ndbno {
+                values["ndbno"] = ndbno
+            }
+            
+            newIngredients.append(values)
+        }
+        
+        let recipesRef = FIRDatabase.database().reference().child("recipes")
+        let recipeChildRef = recipesRef.childByAutoId()
+        
+        let values = ["name": recipeName, "userId": userId, "ingredients": newIngredients] as [String : Any]
+        
+        recipeChildRef.updateChildValues(values, withCompletionBlock: { (error, ref) in
+            if error != nil {
+                print(error)
+                return
+            }
+            
+            let userRecipeRef = FIRDatabase.database().reference().child("user-recipes").child(userId)
+            let recipeId = recipeChildRef.key
+            
+            
+            userRecipeRef.updateChildValues([recipeId: recipeId], withCompletionBlock: { (error, ref) in
+                if error != nil {
+                    print(error)
+                    return
+                }
+                
+                self.dismiss(animated: true, completion: nil)
+            })
+            
+        })
+        
+    }
 
     
 }
 
-extension NewRecipeController: UISearchResultsUpdating, UISearchBarDelegate, UISearchControllerDelegate {
+extension OLDNewRecipeController: UISearchResultsUpdating, UISearchBarDelegate, UISearchControllerDelegate {
     
     func updateSearchResults(for searchController: UISearchController) {
         let newQuery = searchController.searchBar.text!

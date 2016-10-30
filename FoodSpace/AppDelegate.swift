@@ -16,12 +16,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
     
     func applicationDidFinishLaunching(_ application: UIApplication) {
+        if UserDefaults.standard.value(forKey: "recipe_count") == nil {
+            UserDefaults.standard.set(0, forKey: "recipe_count")
+        }
+        
         window = UIWindow(frame: UIScreen.main.bounds)
         window?.makeKeyAndVisible()
         
         window?.rootViewController = UINavigationController(rootViewController: HomeController())
         
         FIRApp.configure()
+        FIRDatabase.database().persistenceEnabled = true
     }
     
     func setNewRootView(newViewController: UIViewController, oldViewController: UIViewController) {

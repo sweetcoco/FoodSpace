@@ -312,7 +312,7 @@ class IngredientDetailController: UIViewController, UITextFieldDelegate, UIPicke
         
         if let newRecipeIngredientNavSearchController: UINavigationController = presentingViewController as? UINavigationController {
             
-            if let newRecipeController: NewRecipeController = newRecipeIngredientNavSearchController.topViewController as? NewRecipeController {
+            if let newRecipeController: RecipeController = newRecipeIngredientNavSearchController.topViewController as? RecipeController {
                 DispatchQueue.main.async(execute: {
                     guard let detailIngredient = self.detailIngredient else {
                         return
@@ -321,6 +321,7 @@ class IngredientDetailController: UIViewController, UITextFieldDelegate, UIPicke
                     newRecipeController.searchController.isActive = false
                     newRecipeController.ingredients.append(detailIngredient)
                     newRecipeController.tableView.reloadData()
+                    newRecipeController.ingredientTableHeightAnchor?.constant = newRecipeController.tableView.contentSize.height + (CGFloat(newRecipeController.ingredients.count) * CGFloat(10))
                     
                     self.dismiss(animated: true, completion: nil)
                     

@@ -19,7 +19,7 @@ class NewRecipeIngredientsSearchResultsController: UITableViewController {
     }
     
     // we need to allow this controller to write selected ingredients to the newRecipeController
-    var newRecipeController: NewRecipeController?
+    var newRecipeController: RecipeController?
     
     let cellId = "cellId"
 
