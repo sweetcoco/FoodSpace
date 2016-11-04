@@ -10,6 +10,7 @@
 		40DED3B03155EA9C92C91988 /* Pods_FoodSpaceTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C346FD4BF5A05A0B4D1225D2 /* Pods_FoodSpaceTests.framework */; };
 		4810A72DD4EC1F92917783C6 /* Pods_FoodSpace.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 42A0AC4CFE43C8E8C22AFC82 /* Pods_FoodSpace.framework */; };
 		7004A0071DA973E00097A914 /* Recipe.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7004A0061DA973E00097A914 /* Recipe.swift */; };
+		70053AE51DCC1BBC00D01B8C /* EditRecipeController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70053AE41DCC1BBC00D01B8C /* EditRecipeController.swift */; };
 		703676F01D9C8CB6006EF6DF /* RecipesController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 703676EF1D9C8CB6006EF6DF /* RecipesController.swift */; };
 		704E883A1D88E05E00990DFE /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 704E88391D88E05E00990DFE /* AppDelegate.swift */; };
 		704E883C1D88E05E00990DFE /* OnboardingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 704E883B1D88E05E00990DFE /* OnboardingViewController.swift */; };
@@ -82,6 +83,7 @@
 		42A0AC4CFE43C8E8C22AFC82 /* Pods_FoodSpace.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_FoodSpace.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		47F41F25B3B3B83A187F3506 /* Pods-FoodSpaceUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-FoodSpaceUITests.release.xcconfig"; path = "Pods/Target Support Files/Pods-FoodSpaceUITests/Pods-FoodSpaceUITests.release.xcconfig"; sourceTree = "<group>"; };
 		7004A0061DA973E00097A914 /* Recipe.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Recipe.swift; sourceTree = "<group>"; };
+		70053AE41DCC1BBC00D01B8C /* EditRecipeController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EditRecipeController.swift; sourceTree = "<group>"; };
 		703676EF1D9C8CB6006EF6DF /* RecipesController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RecipesController.swift; sourceTree = "<group>"; };
 		704E88361D88E05E00990DFE /* FoodSpace.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FoodSpace.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		704E88391D88E05E00990DFE /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -203,6 +205,7 @@
 				708C98541DA9B24F001D4B54 /* RecipeCell.swift */,
 				70AD8BD51D9E0E8A00DA5D7F /* IngredientDetailController.swift */,
 				70AD8BD91DA0459D00DA5D7F /* new recipe */,
+				70053AE41DCC1BBC00D01B8C /* EditRecipeController.swift */,
 			);
 			name = recipes;
 			sourceTree = "<group>";
@@ -687,6 +690,7 @@
 				70E6A01A1D8ED870004A390C /* SettingsController.swift in Sources */,
 				705233781D8E402600481E13 /* UITextViewExtension.swift in Sources */,
 				70F6CD421DA08B4E00842129 /* StringExtension.swift in Sources */,
+				70053AE51DCC1BBC00D01B8C /* EditRecipeController.swift in Sources */,
 				704E88871D89193300990DFE /* UIImageExtension.swift in Sources */,
 				70F6CD461DA18B8F00842129 /* UISearchBarExtension.swift in Sources */,
 				70BBC10B1DC6A345007CBCD8 /* CALayerExtension.swift in Sources */,

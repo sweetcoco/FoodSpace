@@ -99,16 +99,7 @@ class RecipeController: UIViewController, UITableViewDelegate, UITableViewDataSo
         return label
     }()
     
-    let addInstructionImage: UIImageView = {
-        let iv = UIImageView()
-        iv.image = UIImage(named: "add_small")
-        iv.contentMode = .scaleAspectFill
-        iv.translatesAutoresizingMaskIntoConstraints = false
-        iv.isUserInteractionEnabled = true
-        return iv
-    }()
-    
-    let instructionView: UIView = {
+    let instructionContainer: UIView = {
         let iv = UIView()
         iv.translatesAutoresizingMaskIntoConstraints = false
         return iv
@@ -121,6 +112,18 @@ class RecipeController: UIViewController, UITableViewDelegate, UITableViewDataSo
         label.text = "Ingredients Needed:"
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
+    }()
+    
+    let newInstructionTextPlaceHolder = "Preheat oven to 400"
+    let newInstructionText: BaseTextView = {
+        let tv = BaseTextView()
+        tv.textColor = .black
+        tv.isEditable = true
+        tv.font = BaseTextView.Fonts.smallLightFont
+        tv.backgroundColor = .white
+        tv.isUserInteractionEnabled = true
+        tv.translatesAutoresizingMaskIntoConstraints = false
+        return tv
     }()
     
     let addIngredientImage: UIImageView = {
@@ -145,11 +148,21 @@ class RecipeController: UIViewController, UITableViewDelegate, UITableViewDataSo
         dv.alpha = 0.5
         return dv
     }()
+    
+    let footerView: UIView = {
+        let fv = UIView()
+        fv.backgroundColor = .white
+        fv.translatesAutoresizingMaskIntoConstraints = false
+        return fv
+    }()
 
     let searchController = UISearchController(searchResultsController: NewRecipeIngredientsSearchResultsController())
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        if let window = UIApplication.shared.keyWindow {
+            window.backgroundColor = .black
+        }
         view.addSubview(scrollView)
         scrollView.addSubview(contentView)
         scrollView.anchorToTop(top: view.topAnchor, left: view.leftAnchor, bottom: view.bottomAnchor, right: view.rightAnchor)
@@ -160,7 +173,7 @@ class RecipeController: UIViewController, UITableViewDelegate, UITableViewDataSo
         searchController.delegate = self
         searchController.searchBar.delegate = self
         
-        descriptionText.delegate = self
+        //descriptionText.delegate = self
         
         self.searchController.searchResultsController?.view.addObserver(self, forKeyPath: "hidden", options: [], context: nil)
         
@@ -177,7 +190,12 @@ class RecipeController: UIViewController, UITableViewDelegate, UITableViewDataSo
         renderInstructions()
         renderIngredients()
         
+        
+        contentView.addSubview(footerView)
+        footerView.anchorToTop(top: tableView.bottomAnchor, left: contentView.leftAnchor, bottom: contentView.bottomAnchor, right: contentView.rightAnchor)
+        footerView.heightAnchor.constraint(equalToConstant: 100).isActive = true
         setupViewResizerOnKeyboardShown()
+        
     }
     
     func textViewDidChange(_ textView: UITextView) {
@@ -186,11 +204,15 @@ class RecipeController: UIViewController, UITableViewDelegate, UITableViewDataSo
         if textView.text == descriptionTextPlaceHolder && textView == descriptionText {
             moveCursorToStart(textView: textView)
         }
+        
+        if textView.text == newInstructionTextPlaceHolder && textView == newInstructionText {
+            moveCursorToStart(textView: textView)
+        }
     }
     
     internal func scrollToCursorForTextView(textView: UITextView) {
         var cursorRect = textView.caretRect(for: textView.selectedTextRange!.start)
-        let buffer = 20
+        let buffer = 0
         cursorRect = scrollView.convert(cursorRect, from: textView)
         cursorRect.origin.y += (navigationController?.navigationBar.frame.maxY)! + CGFloat(buffer)
         if !self.rectVisible(rect: cursorRect) {
@@ -209,19 +231,18 @@ class RecipeController: UIViewController, UITableViewDelegate, UITableViewDataSo
         return rect.maxY <= visibleRect.maxY
     }
     
-    var defaultViewFrame: CGRect = CGRect()
+    var defaultViewFrame: CGRect?
     
     override func keyboardWillShowForResizing(notification: Notification) {
         if let keyboardSize = (notification.userInfo?[UIKeyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue,
             let window = self.view.window?.frame {
             // We're not just minusing the kb height from the view height because
             // the view could already have been resized for the keyboard before
-            defaultViewFrame = self.view.frame
             contentView.layoutIfNeeded()
             self.view.frame = CGRect(x: self.view.frame.origin.x,
                                      y: self.view.frame.origin.y,
                                      width: self.view.frame.width,
-                                     height: window.origin.y + window.height - keyboardSize.height)
+                                     height: window.origin.y + window.height - (keyboardSize.height + CGFloat(doneBarHeight) + 11))
         } else {
             debugPrint("We're showing the keyboard and either the keyboard size or window is nil: panic widely.")
         }
@@ -230,14 +251,27 @@ class RecipeController: UIViewController, UITableViewDelegate, UITableViewDataSo
     func textViewShouldBeginEditing(_ textView: UITextView) -> Bool {
         if textView == descriptionText {
             activateDimmerViewForDescription()
-            addDoneToolbarToKeyboard()
+            addDoneToolbarToKeyboard(textView: textView)
             
             if textView.text == descriptionTextPlaceHolder {
                 moveCursorToStart(textView: textView)
             }
         }
         
+        if textView == newInstructionText {
+            if textView.text == newInstructionTextPlaceHolder {
+                addDoneToolbarToKeyboard(textView: textView)
+                moveCursorToStart(textView: textView)
+            }
+        }
+        
         return true
+    }
+    
+    func textViewDidBeginEditing(_ textView: UITextView) {
+        DispatchQueue.main.async(execute: {
+            self.scrollToCursorForTextView(textView: textView)
+        })
     }
     
     func textViewShouldEndEditing(_ textView: UITextView) -> Bool {
@@ -251,7 +285,8 @@ class RecipeController: UIViewController, UITableViewDelegate, UITableViewDataSo
     func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
         let newLength = textView.text.utf16.count + text.utf16.count - range.length
         if newLength > 0 {
-            if textView == descriptionText && textView.text == descriptionTextPlaceHolder {
+            if textView == descriptionText && textView.text == descriptionTextPlaceHolder ||
+                textView == newInstructionText && textView.text == newInstructionTextPlaceHolder {
                 if text.utf16.count == 0 { // they hit the back button
                     return false // ignore it
                 }
@@ -261,7 +296,13 @@ class RecipeController: UIViewController, UITableViewDelegate, UITableViewDataSo
             return true
         }
         else {  // no text, so show the placeholder
-            applyPlaceholderStyle(textview: textView, placeholderText: descriptionTextPlaceHolder)
+            var placeHolderText = ""
+            if textView == descriptionText {
+                placeHolderText = descriptionTextPlaceHolder
+            } else {
+                placeHolderText = newInstructionTextPlaceHolder
+            }
+            applyPlaceholderStyle(textview: textView, placeholderText: placeHolderText)
             moveCursorToStart(textView: textView)
             return false
         }
@@ -297,10 +338,10 @@ class RecipeController: UIViewController, UITableViewDelegate, UITableViewDataSo
     }
     
     override func keyboardWillHideForResizing(notification: Notification) {
-        if ((notification.userInfo?[UIKeyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue) != nil {
-            self.view.frame = defaultViewFrame
+        if ((notification.userInfo?[UIKeyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue) != nil && defaultViewFrame != nil {
+            self.view.frame = defaultViewFrame!
         } else {
-            debugPrint("We're about to hide the keyboard and the keyboard size is nil. Now is the rapture.")
+            debugPrint("We're about to hide the keyboard and the keyboard size is nil OR defaultViewFrame is not set. Now is the rapture.")
         }
     }
     
@@ -309,6 +350,12 @@ class RecipeController: UIViewController, UITableViewDelegate, UITableViewDataSo
             super.updateViewConstraints()
             self.ingredientTableHeightAnchor?.constant = self.tableView.contentSize.height
         })
+    }
+    
+    override func viewDidLayoutSubviews() {
+        if defaultViewFrame == nil {
+            defaultViewFrame = self.view.frame
+        }
     }
     
     func setupNavBar() {
@@ -359,38 +406,13 @@ class RecipeController: UIViewController, UITableViewDelegate, UITableViewDataSo
         print("bbb")
     }
 
-    func addInstruction() {
-        let alertController = UIAlertController(title: "Add an instruction", message: "Click OK when done", preferredStyle: .alert)
-        
-        alertController.addTextField { (instructionTextField: UITextField) in
-            instructionTextField.placeholder = "example: Preheat oven to 375 degrees"
-        }
-        
-        let cancel = UIAlertAction(title: "Cancel", style: .cancel) { (cancelAction: UIAlertAction) in
-            print("cancel")
-        }
-        
-        let ok = UIAlertAction(title: "OK", style: .default) { (okAction: UIAlertAction) in
-            guard let instructionText = alertController.textFields?.first?.text else {
-                return
-            }
-            
-            self.appendInstruction(instructionText: instructionText)
-        }
-        
-        alertController.addAction(cancel)
-        alertController.addAction(ok)
-        
-        present(alertController, animated: true, completion: nil)
-    }
-
     func appendInstruction(instructionText: String) {
         if instructionText.characters.count < 1 {
-            return addInstruction()
+            //return addInstruction()
         }
         
         instructions.append(instructionText);
-        renderInstructionTextViews()
+        //renderInstructionTextViews()
     }
     
     func addIngredient() {
@@ -430,10 +452,18 @@ class RecipeController: UIViewController, UITableViewDelegate, UITableViewDataSo
         descriptionContainer.layer.borderWidth = 2
         descriptionContainer.layer.borderColor = UIColor.white.cgColor
         descriptionContainer.layer.cornerRadius = 3
+        
+//        descriptionContainer.layer.shadowColor = UIColor.black.cgColor
+//        descriptionContainer.layer.shadowOpacity = 0.3
+//        descriptionContainer.layer.shadowOffset = CGSize(width: 2, height: 2)
+//        descriptionContainer.layer.shadowRadius = 4
     }
     
-    func addDoneToolbarToKeyboard() {
-        let doneToolbar = UIToolbar(frame: CGRect(x: 0, y: 0, width: 320, height: 50))
+    let doneBarHeight = 50
+    var doneBarAddedToTextView: UITextView?
+    
+    func addDoneToolbarToKeyboard(textView: UITextView) {
+        let doneToolbar = UIToolbar(frame: CGRect(x: 0, y: 0, width: 320, height: doneBarHeight))
         let backgroundView = UIView()
         let doneButton: UIBarButtonItem = UIBarButtonItem(title: "Done", style: .plain, target: self, action: #selector(doneButtonClickedDismissKeyboard))
         doneButton.tintColor = .white
@@ -443,93 +473,101 @@ class RecipeController: UIViewController, UITableViewDelegate, UITableViewDataSo
         doneToolbar.barStyle = .blackTranslucent
         doneToolbar.items = [UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil), doneButton]
         doneToolbar.sizeToFit()
-        descriptionText.inputAccessoryView = doneToolbar
+        textView.inputAccessoryView = doneToolbar
+        doneBarAddedToTextView = textView
     }
     
     func doneButtonClickedDismissKeyboard() {
+        guard let textView = doneBarAddedToTextView else {
+            return
+        }
+        
+        if textView == newInstructionText {
+            print(newInstructionText.frame.size)
+        }
+        doneBarAddedToTextView = nil
         UIApplication.shared.sendAction(#selector(self.resignFirstResponder), to: nil, from: nil, for: nil)
     }
     
     var instructionViewBottomAnchor: NSLayoutConstraint?
     
     func renderInstructions() {
-        contentView.addSubview(instructionsHeader)
-        instructionsHeader.anchorWithConstantsToTop(top: descriptionContainer.bottomAnchor, left: contentView.leftAnchor, bottom: nil, right: contentView.rightAnchor, topConstant: 10, leftConstant: 8, bottomConstant: 0, rightConstant: 8)
+        //instructions.append("1. eat tacos");
+        //instructions.append("2. fire 'em up!");
+        contentView.addSubview(instructionContainer)
+        instructionContainer.anchorWithConstantsToTop(top: descriptionContainer.bottomAnchor, left: contentView.leftAnchor, bottom: nil, right: contentView.rightAnchor, topConstant: 10, leftConstant: 8, bottomConstant: 0, rightConstant: 8)
         
-        if currentState == "edit" {
-            contentView.addSubview(addInstructionImage)
-            addInstructionImage.anchorWithConstantsToTop(top: instructionsHeader.topAnchor, left: nil, bottom: instructionsHeader.bottomAnchor, right: instructionsHeader.rightAnchor, topConstant: 0, leftConstant: 0, bottomConstant: 0, rightConstant: 16)
-            
-            let tap: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(addInstruction))
-            addInstructionImage.addGestureRecognizer(tap)
+        instructionContainer.addSubview(instructionsHeader)
+        instructionsHeader.anchorToTop(top: instructionContainer.topAnchor, left: instructionContainer.leftAnchor, bottom: nil, right: instructionContainer.rightAnchor)
+        
+        for instruction in instructions {
+            renderInstructionTextView(instruction: instruction)
         }
         
-        contentView.addSubview(instructionView)
-        instructionView.anchorWithConstantsToTop(top: instructionsHeader.bottomAnchor, left: contentView.leftAnchor, bottom: nil, right: contentView.rightAnchor, topConstant: 0, leftConstant: 8, bottomConstant: 0, rightConstant: 8)
-        
-        renderInstructionTextViews()
+        renderNewInstructionTextInput()
+        newInstructionText.delegate = self
     }
 
-    func renderInstructionTextViews() {
-        var index = 0
-        while index < instructions.count {
-            if let tv = contentView.viewWithTag(900 + index) {
-                tv.removeFromSuperview()
-            }
-            index += 1
-        }
-        
-        lastInstruction = nil
-        index = 0
-        
-        if !instructions.isEmpty {
-            while index < instructions.count {
-                let tv = BaseTextView()
-                tv.tag = 900 + index
-                tv.textColor = .black
-                tv.isEditable = false
-                tv.font = BaseTextView.Fonts.smallLightFont
-                tv.text = "- \(instructions[index])"
-                
-                contentView.addSubview(tv)
-                
-                if let _lastInstruction = lastInstruction {
-                    tv.anchorToTop(top: _lastInstruction.bottomAnchor, left: instructionView.leftAnchor, bottom: nil, right: instructionView.rightAnchor)
-                } else {
-                    tv.anchorToTop(top: instructionView.topAnchor, left: instructionView.leftAnchor, bottom: nil, right: instructionView.rightAnchor)
-                }
-                
-                lastInstruction = tv
-                index += 1
-            }
-            
-            if let _lastInstruction = lastInstruction {
-                instructionViewBottomAnchor = instructionView.bottomAnchor.constraint(equalTo: _lastInstruction.bottomAnchor)
-                instructionViewBottomAnchor?.isActive = true
-            }
-            
-            UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 1, initialSpringVelocity: 1, options: .curveEaseOut, animations: {
-                self.contentView.layoutIfNeeded()
-                }, completion: nil)
-        } else {
+    func renderInstructionTextView(instruction: String) {
+        let instructionTextView: BaseTextView = {
             let tv = BaseTextView()
-            tv.tag = 900
             tv.textColor = .black
-            tv.isEditable = false
+            tv.isEditable = true
             tv.font = BaseTextView.Fonts.smallLightFont
-            tv.text = "- Add as many steps as you like!"
-            contentView.addSubview(tv)
-            tv.anchorToTop(top: instructionView.topAnchor, left: instructionView.leftAnchor, bottom: nil, right: instructionView.rightAnchor)
-            instructionViewBottomAnchor = instructionView.bottomAnchor.constraint(equalTo: tv.bottomAnchor)
-            instructionViewBottomAnchor?.isActive = true
+            tv.backgroundColor = .white
+            tv.isUserInteractionEnabled = true
+            tv.text = instruction
+            return tv
+        }()
+        
+        var _topAnchor: NSLayoutYAxisAnchor?
+        
+        if let preceedingInstruction = lastInstruction {
+            _topAnchor = preceedingInstruction.bottomAnchor
+        } else {
+            _topAnchor = instructionsHeader.bottomAnchor
         }
+        
+        guard let topAnchor = _topAnchor else {
+            return
+        }
+        
+        instructionContainer.addSubview(instructionTextView)
+        instructionTextView.anchorToTop(top: topAnchor, left: instructionContainer.leftAnchor, bottom: nil, right: instructionContainer.rightAnchor)
+        lastInstruction = instructionTextView
+    }
+    
+    func renderNewInstructionTextInput() {
+        var _topAnchor: NSLayoutYAxisAnchor?
+        
+        if let preceedingInstruction = lastInstruction {
+            _topAnchor = preceedingInstruction.bottomAnchor
+        } else {
+            _topAnchor = instructionsHeader.bottomAnchor
+        }
+        
+        guard let topAnchor = _topAnchor else {
+            return
+        }
+        
+        instructionContainer.addSubview(newInstructionText)
+        newInstructionText.anchorToTop(top: topAnchor, left: instructionContainer.leftAnchor, bottom: instructionContainer.bottomAnchor, right: instructionContainer.rightAnchor)
+        
+        newInstructionText.text = newInstructionTextPlaceHolder
+        newInstructionText.clipsToBounds = false
+        newInstructionText.layer.cornerRadius = 3
+        newInstructionText.layer.shadowColor = UIColor.black.cgColor
+        newInstructionText.layer.shadowOpacity = 0.3
+        newInstructionText.layer.shadowOffset = CGSize(width: 2, height: 2)
+        newInstructionText.layer.shadowRadius = 4
+        applyPlaceholderStyle(textview: newInstructionText, placeholderText: newInstructionTextPlaceHolder)
     }
     
     var ingredientTableHeightAnchor: NSLayoutConstraint?
 
     func renderIngredients() {
         contentView.addSubview(ingredientsHeader)
-        ingredientsHeader.anchorWithConstantsToTop(top: instructionView.bottomAnchor, left: contentView.leftAnchor, bottom: nil, right: contentView.rightAnchor, topConstant: 10, leftConstant: 8, bottomConstant: 0, rightConstant: 8)
+        ingredientsHeader.anchorWithConstantsToTop(top: instructionContainer.bottomAnchor, left: contentView.leftAnchor, bottom: nil, right: contentView.rightAnchor, topConstant: 10, leftConstant: 8, bottomConstant: 0, rightConstant: 8)
         
         if currentState == "edit" {
             contentView.addSubview(addIngredientImage)
@@ -540,7 +578,7 @@ class RecipeController: UIViewController, UITableViewDelegate, UITableViewDataSo
         }
         
         contentView.addSubview(tableView)
-        tableView.anchorToTop(top: ingredientsHeader.bottomAnchor, left: contentView.leftAnchor, bottom: contentView.bottomAnchor, right: contentView.rightAnchor)
+        tableView.anchorToTop(top: ingredientsHeader.bottomAnchor, left: contentView.leftAnchor, bottom: nil, right: contentView.rightAnchor)
         //tableView.anchorWithConstantsToTop(top: ingredientsHeader.bottomAnchor, left: contentView.leftAnchor, bottom: contentView.bottomAnchor, right: contentView.rightAnchor, topConstant: 1000, leftConstant: 0, bottomConstant: 0, rightConstant: 0)
         tableView.backgroundColor = ColorPalette.BrandLightGrey
         
