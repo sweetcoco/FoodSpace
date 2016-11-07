@@ -11,6 +11,9 @@
 		4810A72DD4EC1F92917783C6 /* Pods_FoodSpace.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 42A0AC4CFE43C8E8C22AFC82 /* Pods_FoodSpace.framework */; };
 		7004A0071DA973E00097A914 /* Recipe.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7004A0061DA973E00097A914 /* Recipe.swift */; };
 		70053AE51DCC1BBC00D01B8C /* EditRecipeController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70053AE41DCC1BBC00D01B8C /* EditRecipeController.swift */; };
+		70053AE81DCC255D00D01B8C /* MainTextViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70053AE71DCC255D00D01B8C /* MainTextViewController.swift */; };
+		70053AEA1DCC5C8900D01B8C /* EditInstructionsController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70053AE91DCC5C8900D01B8C /* EditInstructionsController.swift */; };
+		70053AEC1DCD842900D01B8C /* InstructionsCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70053AEB1DCD842900D01B8C /* InstructionsCell.swift */; };
 		703676F01D9C8CB6006EF6DF /* RecipesController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 703676EF1D9C8CB6006EF6DF /* RecipesController.swift */; };
 		704E883A1D88E05E00990DFE /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 704E88391D88E05E00990DFE /* AppDelegate.swift */; };
 		704E883C1D88E05E00990DFE /* OnboardingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 704E883B1D88E05E00990DFE /* OnboardingViewController.swift */; };
@@ -84,6 +87,9 @@
 		47F41F25B3B3B83A187F3506 /* Pods-FoodSpaceUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-FoodSpaceUITests.release.xcconfig"; path = "Pods/Target Support Files/Pods-FoodSpaceUITests/Pods-FoodSpaceUITests.release.xcconfig"; sourceTree = "<group>"; };
 		7004A0061DA973E00097A914 /* Recipe.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Recipe.swift; sourceTree = "<group>"; };
 		70053AE41DCC1BBC00D01B8C /* EditRecipeController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EditRecipeController.swift; sourceTree = "<group>"; };
+		70053AE71DCC255D00D01B8C /* MainTextViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MainTextViewController.swift; sourceTree = "<group>"; };
+		70053AE91DCC5C8900D01B8C /* EditInstructionsController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EditInstructionsController.swift; sourceTree = "<group>"; };
+		70053AEB1DCD842900D01B8C /* InstructionsCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InstructionsCell.swift; sourceTree = "<group>"; };
 		703676EF1D9C8CB6006EF6DF /* RecipesController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RecipesController.swift; sourceTree = "<group>"; };
 		704E88361D88E05E00990DFE /* FoodSpace.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FoodSpace.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		704E88391D88E05E00990DFE /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -180,6 +186,17 @@
 			name = Pods;
 			sourceTree = "<group>";
 		};
+		70053AE61DCC250600D01B8C /* EditRecipe */ = {
+			isa = PBXGroup;
+			children = (
+				70053AE41DCC1BBC00D01B8C /* EditRecipeController.swift */,
+				70053AE71DCC255D00D01B8C /* MainTextViewController.swift */,
+				70053AE91DCC5C8900D01B8C /* EditInstructionsController.swift */,
+				70053AEB1DCD842900D01B8C /* InstructionsCell.swift */,
+			);
+			name = EditRecipe;
+			sourceTree = "<group>";
+		};
 		703676EC1D9C8B20006EF6DF /* home */ = {
 			isa = PBXGroup;
 			children = (
@@ -205,7 +222,7 @@
 				708C98541DA9B24F001D4B54 /* RecipeCell.swift */,
 				70AD8BD51D9E0E8A00DA5D7F /* IngredientDetailController.swift */,
 				70AD8BD91DA0459D00DA5D7F /* new recipe */,
-				70053AE41DCC1BBC00D01B8C /* EditRecipeController.swift */,
+				70053AE61DCC250600D01B8C /* EditRecipe */,
 			);
 			name = recipes;
 			sourceTree = "<group>";
@@ -668,6 +685,7 @@
 				70AD8BD01D9DF1AB00DA5D7F /* Ingredient.swift in Sources */,
 				704E886E1D88E63000990DFE /* OnboardingPageCell.swift in Sources */,
 				704E88421D88E05E00990DFE /* FoodSpace.xcdatamodeld in Sources */,
+				70053AEA1DCC5C8900D01B8C /* EditInstructionsController.swift in Sources */,
 				704E886C1D88E23F00990DFE /* UIViewExtension.swift in Sources */,
 				70AD8BD61D9E0E8A00DA5D7F /* IngredientDetailController.swift in Sources */,
 				70E6A0201D9B5E73004A390C /* LoginCell.swift in Sources */,
@@ -683,11 +701,13 @@
 				7063579B1DBEE5E500888625 /* BaseScrollView.swift in Sources */,
 				70AD8BCE1D9DF02900DA5D7F /* NewRecipeIngredientCell.swift in Sources */,
 				7052336A1D8C8F9600481E13 /* HomeController.swift in Sources */,
+				70053AE81DCC255D00D01B8C /* MainTextViewController.swift in Sources */,
 				705233721D8DCF5100481E13 /* MealPlanCell.swift in Sources */,
 				7099B35F1D8A6F7200340C1B /* UIColorExtension.swift in Sources */,
 				708C98581DB6DB4C001D4B54 /* RecipeController.swift in Sources */,
 				7004A0071DA973E00097A914 /* Recipe.swift in Sources */,
 				70E6A01A1D8ED870004A390C /* SettingsController.swift in Sources */,
+				70053AEC1DCD842900D01B8C /* InstructionsCell.swift in Sources */,
 				705233781D8E402600481E13 /* UITextViewExtension.swift in Sources */,
 				70F6CD421DA08B4E00842129 /* StringExtension.swift in Sources */,
 				70053AE51DCC1BBC00D01B8C /* EditRecipeController.swift in Sources */,

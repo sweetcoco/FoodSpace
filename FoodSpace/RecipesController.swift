@@ -145,8 +145,7 @@ class RecipesController: UIViewController, UITableViewDelegate, UITableViewDataS
         displayingPopover?.dismiss()
         
         
-        let newRecipeController = RecipeController()
-        newRecipeController.currentState = "edit"
+        let newRecipeController = EditRecipeController()
         let navController = UINavigationController(rootViewController: newRecipeController)
         present(navController, animated: true, completion: nil)
     }

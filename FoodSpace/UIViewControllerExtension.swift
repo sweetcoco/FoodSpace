@@ -45,4 +45,10 @@ extension UIViewController {
             debugPrint("We're about to hide the keyboard and the keyboard size is nil. Now is the rapture.")
         }
     }
+    
+    func estimateFrameForText(_ text: String, font: UIFont, width: CGFloat) -> CGRect {
+        let size = CGSize(width: width, height: 1000)
+        let options = NSStringDrawingOptions.usesFontLeading.union(.usesLineFragmentOrigin)
+        return NSString(string: text).boundingRect(with: size, options: options, attributes: [NSFontAttributeName: font], context: nil)
+    }
 }
