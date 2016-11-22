@@ -25,6 +25,12 @@ class InstructionsCell: UICollectionViewCell {
         }
     }
     
+    var isLastCell = false {
+        didSet {
+            bottomBorder.isHidden = isLastCell
+        }
+    }
+    
     var constraintConstantsSet = false
     var containerViewLeftConstant: CGFloat?
     var containerViewRightConstant: CGFloat?
@@ -93,6 +99,12 @@ class InstructionsCell: UICollectionViewCell {
         return label
     }()
     
+    let bottomBorder: UIView = {
+        let view = UIView()
+        view.backgroundColor = ColorPalette.BrandOffWhite
+        return view
+    }()
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         
@@ -121,11 +133,16 @@ class InstructionsCell: UICollectionViewCell {
         lineNumberView.widthAnchor.constraint(equalToConstant: lineNumberHeight).isActive = true
         lineNumberView.centerYAnchor.constraint(equalTo: containerView.centerYAnchor).isActive = true
         
-        lineNumberLabel.anchorWithConstantsToTop(top: lineNumberView.topAnchor, left: lineNumberView.leftAnchor, bottom: lineNumberView.bottomAnchor, right: lineNumberView.rightAnchor, topConstant: 10, leftConstant: 10, bottomConstant: 10, rightConstant: 10)
+        lineNumberLabel.anchorWithConstantsToTop(top: lineNumberView.topAnchor, left: lineNumberView.leftAnchor, bottom: lineNumberView.bottomAnchor, right: lineNumberView.rightAnchor, topConstant: 10, leftConstant: 5, bottomConstant: 10, rightConstant: 5)
         
         textView.anchorToTop(top: nil, left: lineNumberView.rightAnchor, bottom: nil, right: containerView.rightAnchor)
         textView.centerYAnchor.constraint(equalTo: containerView.centerYAnchor).isActive = true
         textView.backgroundColor = .clear
+        
+        containerView.addSubview(bottomBorder)
+        bottomBorder.anchorToTop(top: nil, left: containerView.leftAnchor, bottom: containerView.bottomAnchor, right: containerView.rightAnchor)
+        bottomBorder.heightAnchor.constraint(equalToConstant: 1).isActive = true
+        
     }
     
     override func layoutSubviews() {
@@ -133,7 +150,9 @@ class InstructionsCell: UICollectionViewCell {
         
         lineNumberView.layer.cornerRadius = lineNumberView.bounds.size.width/2
         //containerView.addTopBorderWithColor(color: .lightGray, andWidth: 1)
-        containerView.addBottomBorderWithColor(color: .lightGray, andWidth: 1)
+        //containerView.addBottomBorderWithColor(color: ColorPalette.BrandOffWhite, andWidth: 1)
+        
+        bottomBorder.isHidden = isLastCell
     }
     
     required init?(coder aDecoder: NSCoder) {

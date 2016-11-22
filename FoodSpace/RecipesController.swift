@@ -47,7 +47,7 @@ class RecipesController: UIViewController, UITableViewDelegate, UITableViewDataS
         
         setupTableView()
         
-        setupMenuBar()
+        //setupMenuBar()
         
         loadRecipes()
         

@@ -27,6 +27,16 @@ class EditInstructionsController: UICollectionViewController, UITextFieldDelegat
         return view
     }()
     
+    var forceEdit: Bool?
+    
+    let editButton: UIButton = {
+        let button = UIButton()
+        button.setTitle("Edit", for: .normal)
+        button.isUserInteractionEnabled = true
+        button.translatesAutoresizingMaskIntoConstraints = false
+        return button
+    }()
+    
     let deleteButton: UIButton = {
         let button = UIButton()
         button.setTitle("Delete", for: .normal)
@@ -58,15 +68,28 @@ class EditInstructionsController: UICollectionViewController, UITextFieldDelegat
         swipeGestureRight.direction = UISwipeGestureRecognizerDirection.right
         collectionView?.addGestureRecognizer(swipeGestureRight)
         
-        lineNumberWidth = estimateFrameForText("UPPERCASE", font: BaseTextView.Fonts.smallLightFont!, width: 200).height + 40
+        lineNumberWidth = estimateFrameForText("UPPERCASE", font: BaseTextView.Fonts.smallLightFont!, width: 200).height + 15
         
         collectionView?.backgroundView = backgroundView
+        editButton.addTarget(self, action: #selector(handleEditInstruction), for: .touchUpInside)
         deleteButton.addTarget(self, action: #selector(handleDeleteInstruction), for: .touchUpInside)
     }
     
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
+        
         setupNav()
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        if let _forceEdit = forceEdit {
+            if (_forceEdit == true && instructionIndexBeingEdited != nil) {
+                handleEditInstruction()
+                return
+            }
+        }
+        inputContainerView.inputTextField.becomeFirstResponder()
     }
     
     func setupNav() {
@@ -190,7 +213,7 @@ class EditInstructionsController: UICollectionViewController, UITextFieldDelegat
         let textViewWidth = width - (containerViewLeftConstant + numberViewLeftConstant + lineNumberWidth! + numberViewRightConstant + containerViewRightConstant)
         
         let minimumHeight = lineNumberWidth! + 20
-        let estimatedHeight = estimateFrameForText(instruction, font: BaseTextView.Fonts.smallLightFont!, width: textViewWidth).height
+        let estimatedHeight = estimateFrameForText(instruction, font: BaseTextView.Fonts.smallLightFont!, width: textViewWidth).height + 10
         
         height = estimatedHeight > minimumHeight ? estimatedHeight : minimumHeight
 
@@ -207,17 +230,56 @@ class EditInstructionsController: UICollectionViewController, UITextFieldDelegat
         })
     }
     
+    var instructionIndexBeingEdited: IndexPath?
+    var instructionCellBeingEdited: InstructionsCell?
+    var sendButtonTitle: String? {
+        didSet {
+            guard let sendButtonTitle = sendButtonTitle else {
+                return
+            }
+            inputContainerView.sendButton.setTitle(sendButtonTitle, for: UIControlState())
+            
+            if (sendButtonTitle == "Edit") {
+                inputContainerView.cancelEditButton.isHidden = false
+                inputContainerView.editBannerLabel.isHidden = false
+            } else {
+                inputContainerView.cancelEditButton.isHidden = true
+                inputContainerView.editBannerLabel.isHidden = true
+            }
+        }
+    }
+    
     var containerViewBottomAnchor: NSLayoutConstraint?
     
     func handleSend() {
         if (!inputContainerView.inputTextField.text!.isEmpty) {
+            
+            if (instructionIndexBeingEdited != nil && instructionCellBeingEdited != nil) {
+                instructions[(instructionIndexBeingEdited?.item)!] = (instructionCellBeingEdited?.textView.text!)!
+                instructionIndexBeingEdited = nil
+                instructionCellBeingEdited = nil
+                sendButtonTitle = "Add"
+                inputContainerView.inputTextField.text = ""
+                
+                return
+            }
+            
             instructions.append(inputContainerView.inputTextField.text!)
             inputContainerView.inputTextField.text = ""
         }
     }
     
-    func handleLongGesture(gesture: UILongPressGestureRecognizer) {
+    func cancelEdit() {
+        instructionCellBeingEdited?.textView.text = instructions[(instructionIndexBeingEdited?.item)!]
         
+        instructionIndexBeingEdited = nil
+        instructionCellBeingEdited = nil
+        sendButtonTitle = "Add"
+        inputContainerView.inputTextField.text = ""
+    }
+    
+    func handleLongGesture(gesture: UILongPressGestureRecognizer) {
+        cancelEdit()
         switch(gesture.state) {
             
         case UIGestureRecognizerState.began:
@@ -243,8 +305,12 @@ class EditInstructionsController: UICollectionViewController, UITextFieldDelegat
             return
         }
         
+        cancelEdit()
+        
         if (gesture.direction == .left) {
+            collectionView?.backgroundView?.addSubview(editButton)
             collectionView?.backgroundView?.addSubview(deleteButton)
+            
             deleteButton.anchorWithConstantsToTop(top: nil, left: nil, bottom: nil, right: view.rightAnchor, topConstant: 20, leftConstant: 0, bottomConstant: 0, rightConstant: containerViewRightConstant)
             deleteButton.heightAnchor.constraint(equalToConstant: 50).isActive = true
             deleteButton.widthAnchor.constraint(equalToConstant: 80).isActive = true
@@ -252,7 +318,14 @@ class EditInstructionsController: UICollectionViewController, UITextFieldDelegat
             deleteButton.backgroundColor = .red
             deleteIndexPath = selectedIndexPath
             
-            let cellPosition = CGPoint(x: cell.frame.origin.x - 100.0, y: cell.frame.origin.y)
+            editButton.anchorWithConstantsToTop(top: nil, left: nil, bottom: nil, right: deleteButton.leftAnchor, topConstant: 20, leftConstant: 0, bottomConstant: 0, rightConstant: containerViewRightConstant)
+            editButton.heightAnchor.constraint(equalToConstant: 50).isActive = true
+            editButton.widthAnchor.constraint(equalToConstant: 80).isActive = true
+            editButton.centerYAnchor.constraint(equalTo: cell.contentView.centerYAnchor).isActive = true
+            editButton.backgroundColor = .lightGray
+            instructionIndexBeingEdited = selectedIndexPath
+            
+            let cellPosition = CGPoint(x: cell.frame.origin.x - 200.0, y: cell.frame.origin.y)
             
             UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 1, initialSpringVelocity: 1, options: .curveEaseOut, animations: {
                 cell.frame = CGRect(x: cellPosition.x, y: cellPosition.y, width: cell.frame.size.width, height: cell.frame.size.height)
@@ -262,15 +335,39 @@ class EditInstructionsController: UICollectionViewController, UITextFieldDelegat
         if (gesture.direction == .right) {
             
             if (cell.frame.origin.x < (collectionView?.frame.origin.x)!) {
-                let cellPosition = CGPoint(x: cell.frame.origin.x + 100.0, y: cell.frame.origin.y)
+                let cellPosition = CGPoint(x: cell.frame.origin.x + 200.0, y: cell.frame.origin.y)
                 deleteIndexPath = nil
+                instructionIndexBeingEdited = nil
                 
                 UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 1, initialSpringVelocity: 1, options: .curveEaseOut, animations: {
                     cell.frame = CGRect(x: cellPosition.x, y: cellPosition.y, width: cell.frame.size.width, height: cell.frame.size.height)
                     self.deleteButton.removeFromSuperview()
+                    self.editButton.removeFromSuperview()
                 }, completion: nil)
             }
             
+        }
+    }
+    
+    func handleEditInstruction() {
+        if (instructionIndexBeingEdited != nil) {
+            if let cell: InstructionsCell  = collectionView?.cellForItem(at: instructionIndexBeingEdited!) as? InstructionsCell {
+                instructionCellBeingEdited = cell
+                inputContainerView.inputTextField.text = instructions[(instructionIndexBeingEdited?.item)!]
+                sendButtonTitle = "Edit"
+                
+                if (forceEdit == true) {
+                    inputContainerView.inputTextField.becomeFirstResponder()
+                    forceEdit = false
+                }
+                if (cell.frame.origin.x < (collectionView?.frame.origin.x)!) {
+                    let cellPosition = CGPoint(x: cell.frame.origin.x + 200.0, y: cell.frame.origin.y)
+                    
+                    UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 1, initialSpringVelocity: 1, options: .curveEaseOut, animations: {
+                        cell.frame = CGRect(x: cellPosition.x, y: cellPosition.y, width: cell.frame.size.width, height: cell.frame.size.height)
+                    }, completion: nil)
+                }
+            }
         }
     }
     
@@ -312,7 +409,6 @@ class EditInstructionsController: UICollectionViewController, UITextFieldDelegat
     func handleCancel() {
         view.endEditing(true)
         self.dismiss(animated: true, completion: nil)
-        
     }
     
     func handleDone() {
@@ -382,6 +478,7 @@ class InputContainerView: UIView, UITextFieldDelegate {
     weak var parentController: EditInstructionsController? {
         didSet {
             sendButton.addTarget(parentController, action: #selector(EditInstructionsController.handleSend), for: .touchUpInside)
+            cancelEditButton.addTarget(parentController, action: #selector(EditInstructionsController.cancelEdit), for: .touchUpInside)
         }
     }
     
@@ -389,6 +486,7 @@ class InputContainerView: UIView, UITextFieldDelegate {
         let textField = UITextField()
         textField.placeholder = "Enter instructions..."
         textField.translatesAutoresizingMaskIntoConstraints = false
+        textField.font = BaseTextView.Fonts.smallRegularFont
         textField.delegate = self
         return textField
     }()
@@ -402,6 +500,8 @@ class InputContainerView: UIView, UITextFieldDelegate {
     }()
     
     let sendButton = UIButton(type: .system)
+    let cancelEditButton = UIButton(type: .system)
+    let editBannerLabel = UILabel()
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -420,6 +520,17 @@ class InputContainerView: UIView, UITextFieldDelegate {
         sendButton.tintColor = ColorPalette.BrandGreen
         sendButton.translatesAutoresizingMaskIntoConstraints = false
         
+        cancelEditButton.setTitle("X", for: UIControlState())
+        cancelEditButton.setTitleColor(.red, for: UIControlState())
+        cancelEditButton.translatesAutoresizingMaskIntoConstraints = false
+        cancelEditButton.isHidden = true
+        
+        editBannerLabel.text = "Editing instruction..."
+        editBannerLabel.textColor = .lightGray
+        editBannerLabel.font = UIFont(name: "Lato-Light", size: 12)
+        editBannerLabel.translatesAutoresizingMaskIntoConstraints = false
+        editBannerLabel.isHidden = true
+            
         //what is handleSend?
         
         addSubview(sendButton)
@@ -429,12 +540,23 @@ class InputContainerView: UIView, UITextFieldDelegate {
         sendButton.widthAnchor.constraint(equalToConstant: 80).isActive = true
         sendButton.heightAnchor.constraint(equalTo: heightAnchor).isActive = true
         
+        addSubview(cancelEditButton)
+        //x,y,w,h
+        cancelEditButton.leftAnchor.constraint(equalTo: leftAnchor).isActive = true
+        cancelEditButton.centerYAnchor.constraint(equalTo: centerYAnchor).isActive = true
+        cancelEditButton.widthAnchor.constraint(equalToConstant: 80).isActive = true
+        cancelEditButton.heightAnchor.constraint(equalTo: heightAnchor).isActive = true
+        
         addSubview(self.inputTextField)
         //x,y,w,h
         self.inputTextField.leftAnchor.constraint(equalTo: uploadImageView.rightAnchor, constant: 8).isActive = true
         self.inputTextField.centerYAnchor.constraint(equalTo: centerYAnchor).isActive = true
         self.inputTextField.rightAnchor.constraint(equalTo: sendButton.leftAnchor).isActive = true
         self.inputTextField.heightAnchor.constraint(equalTo: heightAnchor).isActive = true
+        
+        addSubview(editBannerLabel)
+        //x,y,w,h
+        editBannerLabel.anchorWithConstantsToTop(top: topAnchor, left: inputTextField.leftAnchor, bottom: nil, right: nil, topConstant: 1, leftConstant: 0, bottomConstant: 0, rightConstant: 0)
         
         let separatorLineView = UIView()
         separatorLineView.backgroundColor = UIColor(r: 220, g: 220, b: 220)
@@ -449,6 +571,16 @@ class InputContainerView: UIView, UITextFieldDelegate {
     
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         parentController?.handleSend()
+        return true
+    }
+    
+    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+        if (parentController?.instructionCellBeingEdited != nil && parentController?.instructionIndexBeingEdited != nil) {
+            
+            let text: NSString = (parentController?.instructionCellBeingEdited?.textView.text ?? "") as NSString
+            let resultString = text.replacingCharacters(in: range, with: string)
+            parentController?.instructionCellBeingEdited?.textView.text = resultString
+        }
         return true
     }
     

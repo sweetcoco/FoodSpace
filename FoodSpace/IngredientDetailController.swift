@@ -146,11 +146,13 @@ class IngredientDetailController: UIViewController, UITextFieldDelegate, UIPicke
         setupNavBar()
         
         view.addSubview(titleLabel)
-        titleLabel.anchorWithConstantsToTop(top: view.topAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, topConstant: 10, leftConstant: 8, bottomConstant: 0, rightConstant: 8)
+        titleLabel.anchorWithConstantsToTop(top: view.topAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, topConstant: 0, leftConstant: 8, bottomConstant: 0, rightConstant: 8)
+        titleLabel.heightAnchor.constraint(equalToConstant: 50).isActive = true
         
         
         view.addSubview(unitField)
         unitField.anchorWithConstantsToTop(top: titleLabel.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, topConstant: 10, leftConstant: 8, bottomConstant: 0, rightConstant: 8)
+        unitField.heightAnchor.constraint(equalToConstant: 50).isActive = true
         
         view.addSubview(unitPickerSpace)
         unitPickerSpace.anchorWithConstantsToTop(top: unitField.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, topConstant: 10, leftConstant: 8, bottomConstant: 0, rightConstant: 8)
@@ -165,6 +167,7 @@ class IngredientDetailController: UIViewController, UITextFieldDelegate, UIPicke
         
         view.addSubview(quantityField)
         quantityField.anchorWithConstantsToTop(top: unitPickerSpace.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, topConstant: 10, leftConstant: 8, bottomConstant: 0, rightConstant: 8)
+        quantityField.heightAnchor.constraint(equalToConstant: 50).isActive = true
         
         view.addSubview(quantityPickerSpace)
         quantityPickerSpace.anchorWithConstantsToTop(top: quantityField.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, topConstant: 10, leftConstant: 8, bottomConstant: 0, rightConstant: 8)
@@ -176,19 +179,55 @@ class IngredientDetailController: UIViewController, UITextFieldDelegate, UIPicke
         quantityPickerView.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
         quantityPickerView.heightAnchor.constraint(equalToConstant: 120).isActive = true
         
+        guard let detailIngredient = detailIngredient else {
+            return
+        }
+        if let detailUnit = detailIngredient.unit {
+            let units = Quantities.unitsStringArray
+            let defaultUnit = units.index(of: detailUnit)
+            unitPickerView.selectRow(defaultUnit!, inComponent: 0, animated: true)
+            unitField.text = units[unitPickerView.selectedRow(inComponent: 0)]
+        }
         
-        view.addSubview(methodField)
-        methodField.anchorWithConstantsToTop(top: quantityPickerSpace.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, topConstant: 10, leftConstant: 8, bottomConstant: 0, rightConstant: 8)
+        if let detailQuantity = detailIngredient.quantity {
+            if detailQuantity != Double(0.0) {
+                let wholeNumbers = Quantities.zeroToHundredStringArray
+                let fractions = Quantities.getAllFractionsStringArray()
+                let quantityTouple = Quantities.getFractionStringFromDecimal(decimal: detailQuantity)
+                
+                var wholeNumber = ""
+                
+                if (quantityTouple.wholeNumber != 0) {
+                    let defaultWholeNumber = wholeNumbers.index(of: "\(quantityTouple.wholeNumber)")
+                    if let defaultWholeNumber = defaultWholeNumber {
+                        wholeNumber = wholeNumbers[defaultWholeNumber]
+                        quantityPickerView.selectRow(defaultWholeNumber, inComponent: 0, animated: true)
+                        quantityWholeNumberString = wholeNumber
+                    }
+                }
+                
+                if let defaultFraction = fractions.index(of: quantityTouple.fractionString) {
+                    quantityPickerView.selectRow(defaultFraction, inComponent: 1, animated: true)
+                    quantityFractionString = fractions[defaultFraction]
+                }
+                
+                quantityField.text = wholeNumber + " " + quantityTouple.fractionString
+            }
+        }
         
-        view.addSubview(methodPickerSpace)
-        methodPickerSpace.anchorWithConstantsToTop(top: methodField.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, topConstant: 10, leftConstant: 8, bottomConstant: 0, rightConstant: 8)
-        methodPickerSpaceHeightAnchor = methodPickerSpace.heightAnchor.constraint(equalToConstant: 1)
-        methodPickerSpaceHeightAnchor?.isActive = true
         
-        methodPickerSpace.addSubview(methodPickerView)
-        methodPickerView.topAnchor.constraint(equalTo: methodPickerSpace.topAnchor).isActive = true
-        methodPickerView.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
-        methodPickerView.heightAnchor.constraint(equalToConstant: 120).isActive = true
+//        view.addSubview(methodField)
+//        methodField.anchorWithConstantsToTop(top: quantityPickerSpace.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, topConstant: 10, leftConstant: 8, bottomConstant: 0, rightConstant: 8)
+//        
+//        view.addSubview(methodPickerSpace)
+//        methodPickerSpace.anchorWithConstantsToTop(top: methodField.bottomAnchor, left: view.leftAnchor, bottom: nil, right: view.rightAnchor, topConstant: 10, leftConstant: 8, bottomConstant: 0, rightConstant: 8)
+//        methodPickerSpaceHeightAnchor = methodPickerSpace.heightAnchor.constraint(equalToConstant: 1)
+//        methodPickerSpaceHeightAnchor?.isActive = true
+//        
+//        methodPickerSpace.addSubview(methodPickerView)
+//        methodPickerView.topAnchor.constraint(equalTo: methodPickerSpace.topAnchor).isActive = true
+//        methodPickerView.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
+//        methodPickerView.heightAnchor.constraint(equalToConstant: 120).isActive = true
         
         
     }
@@ -200,6 +239,10 @@ class IngredientDetailController: UIViewController, UITextFieldDelegate, UIPicke
         
         if hasAdd {
             navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Add", style: .plain, target: self, action: #selector(handleAdd))
+            navigationItem.rightBarButtonItem?.setTitleTextAttributes([
+                NSForegroundColorAttributeName : UIColor.white], for: .normal)
+        } else {
+            navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Save", style: .plain, target: self, action: #selector(handleSave))
             navigationItem.rightBarButtonItem?.setTitleTextAttributes([
                 NSForegroundColorAttributeName : UIColor.white], for: .normal)
         }
@@ -254,28 +297,28 @@ class IngredientDetailController: UIViewController, UITextFieldDelegate, UIPicke
             }, completion: nil)
     }
     
-    func renderMethodPicker() {
-        
-        let height = methodPickerView.frame.height
-        methodPickerSpaceHeightAnchor?.constant = height
-        
-        UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 1, initialSpringVelocity: 1, options: .curveEaseOut, animations: {
-            self.view.layoutIfNeeded()
-            }, completion: nil)
-    }
-    
-    func closeMethodPicker() {
-        methodPickerSpaceHeightAnchor?.constant = 1
-        
-        UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 1, initialSpringVelocity: 1, options: .curveEaseOut, animations: {
-            self.view.layoutIfNeeded()
-            }, completion: nil)
-    }
+//    func renderMethodPicker() {
+//        
+//        let height = methodPickerView.frame.height
+//        methodPickerSpaceHeightAnchor?.constant = height
+//        
+//        UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 1, initialSpringVelocity: 1, options: .curveEaseOut, animations: {
+//            self.view.layoutIfNeeded()
+//            }, completion: nil)
+//    }
+//    
+//    func closeMethodPicker() {
+//        methodPickerSpaceHeightAnchor?.constant = 1
+//        
+//        UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 1, initialSpringVelocity: 1, options: .curveEaseOut, animations: {
+//            self.view.layoutIfNeeded()
+//            }, completion: nil)
+//    }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         closeUnitPicker()
         closeQuantityPicker()
-        closeMethodPicker()
+//        closeMethodPicker()
     }
     
     func handleCancel() {
@@ -304,8 +347,24 @@ class IngredientDetailController: UIViewController, UITextFieldDelegate, UIPicke
         
         detailIngredient.quantity = total
         
-        if let newMethod = methodField.text {
-            detailIngredient.method = newMethod
+//        if let newMethod = methodField.text {
+//            detailIngredient.method = newMethod
+//        }
+        
+        if let parentViewController: UINavigationController = presentingViewController as? UINavigationController {
+            if let editIngredientsController: EditIngredientsController = parentViewController.topViewController as? EditIngredientsController {
+                DispatchQueue.main.async(execute: { 
+                    guard let detailIngredient = self.detailIngredient else {
+                        return
+                    }
+                    
+                    editIngredientsController.searchController.isActive = false
+                    editIngredientsController.ingredients.append(detailIngredient)
+                    editIngredientsController.collectionView?.reloadData()
+                    
+                    self.dismiss(animated: true, completion: nil)
+                })
+            }
         }
         
         
@@ -328,6 +387,50 @@ class IngredientDetailController: UIViewController, UITextFieldDelegate, UIPicke
                 })
             }
         }
+    }
+    
+    func handleSave() {
+        guard let detailIngredient = detailIngredient else {
+            return
+        }
+        
+        if let newUnit: String = unitField.text {
+            detailIngredient.unit = newUnit
+        }
+        
+        var total: Double = 0
+        if !quantityWholeNumberString.isEmpty {
+            total = Double(quantityWholeNumberString)!
+        }
+        
+        if !quantityFractionString.isEmpty {
+            if let fraction = Quantities.findFractionEnumFromFractionString(fractionAsString: quantityFractionString) {
+                total += fraction.rawValue
+            }
+        }
+        
+        detailIngredient.quantity = total
+        
+        if let parentViewController: UINavigationController = presentingViewController as? UINavigationController {
+            if let editIngredientsController: EditIngredientsController = parentViewController.topViewController as? EditIngredientsController {
+                DispatchQueue.main.async(execute: {
+                    editIngredientsController.collectionView?.reloadData()
+                    
+                    self.dismiss(animated: true, completion: nil)
+                })
+            }
+        }
+        
+        if let parentViewController: UINavigationController = presentingViewController as? UINavigationController {
+            if let editRecipeController: EditRecipeController = parentViewController.topViewController as? EditRecipeController {
+                DispatchQueue.main.async(execute: {
+                    editRecipeController.ingredientsCollectionView.reloadData()
+                    
+                    self.dismiss(animated: true, completion: nil)
+                })
+            }
+        }
+
     }
     
     func numberOfComponents(in pickerView: UIPickerView) -> Int {
@@ -354,9 +457,9 @@ class IngredientDetailController: UIViewController, UITextFieldDelegate, UIPicke
             }
         }
         
-        if pickerView == methodPickerView {
-            return methodArray.count
-        }
+//        if pickerView == methodPickerView {
+//            return methodArray.count
+//        }
         
         return 0
     }
@@ -378,9 +481,9 @@ class IngredientDetailController: UIViewController, UITextFieldDelegate, UIPicke
             }
         }
         
-        if pickerView == methodPickerView {
-            return methodArray[row]
-        }
+//        if pickerView == methodPickerView {
+//            return methodArray[row]
+//        }
         
         return ""
     }
@@ -407,32 +510,36 @@ class IngredientDetailController: UIViewController, UITextFieldDelegate, UIPicke
             quantityField.text = "\(quantityWholeNumberString) \(quantityFractionString)"
         }
         
-        if pickerView == methodPickerView {
-            methodField.text = methodArray[row]
-        }
+//        if pickerView == methodPickerView {
+//            methodField.text = methodArray[row]
+//        }
+    }
+    
+    func pickerView(_ pickerView: UIPickerView, rowHeightForComponent component: Int) -> CGFloat {
+        return 30
     }
     
     func textFieldShouldBeginEditing(_ textField: UITextField) -> Bool {
         if textField == unitField {
             closeQuantityPicker()
-            closeMethodPicker()
+//            closeMethodPicker()
             
             renderUnitPicker()
         }
         
         if textField == quantityField {
             closeUnitPicker()
-            closeMethodPicker()
+//            closeMethodPicker()
             
             renderQuantityPicker()
         }
         
-        if textField == methodField {
-            closeUnitPicker()
-            closeQuantityPicker()
-            
-            renderMethodPicker()
-        }
+//        if textField == methodField {
+//            closeUnitPicker()
+//            closeQuantityPicker()
+//            
+//            renderMethodPicker()
+//        }
         return false
     }
     

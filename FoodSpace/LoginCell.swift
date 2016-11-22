@@ -227,7 +227,7 @@ class LoginCell: UICollectionViewCell, UITextFieldDelegate {
         FIRAuth.auth()?.signIn(withEmail: email, password: password, completion: { (user, error) in
             
             if error != nil {
-                print(error)
+                print(error!)
                 return
             }
             
@@ -241,7 +241,7 @@ class LoginCell: UICollectionViewCell, UITextFieldDelegate {
                 vc = vc.presentingViewController!
                 
                 if let ovc = vc as? OnboardingViewController {
-                    ovc.homeController?.fetchUserAndSetupNavBarTitle()
+                    //ovc.homeController?.fetchUserAndSetupNavBarTitle()
                 }
             }
             vc.dismiss(animated: false, completion: nil)
@@ -259,7 +259,7 @@ class LoginCell: UICollectionViewCell, UITextFieldDelegate {
         FIRAuth.auth()?.createUser(withEmail: email, password: password, completion: { (user, error) in
             
             if error != nil {
-                print(error)
+                print(error!)
                 return
             }
             //successfully registered the user
@@ -280,7 +280,7 @@ class LoginCell: UICollectionViewCell, UITextFieldDelegate {
             // write it to the db
             userReference.updateChildValues(values, withCompletionBlock: { (err, ref) in
                 if err != nil {
-                    print(err)
+                    print(err!)
                 }
                 
                 print("Saved user successfully into Firebase db")
@@ -293,7 +293,7 @@ class LoginCell: UICollectionViewCell, UITextFieldDelegate {
                     vc = vc.presentingViewController!
                     
                     if let ovc = vc as? OnboardingViewController {
-                        ovc.homeController?.fetchUserAndSetupNavBarTitle()
+                        //ovc.homeController?.fetchUserAndSetupNavBarTitle()
                     }
                 }
                 vc.dismiss(animated: false, completion: nil)

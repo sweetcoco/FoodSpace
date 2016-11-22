@@ -190,7 +190,7 @@ class HomeController: UIViewController, UICollectionViewDataSource, UICollection
         
         let onboardingController = OnboardingViewController()
         
-        onboardingController.homeController = self
+        //onboardingController.homeController = self
         
         
         present(onboardingController, animated: true, completion: nil)

@@ -58,8 +58,10 @@ class NewRecipeIngredientsSearchResultsController: UITableViewController {
     }
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let ingredient: Ingredient
-        ingredient = ingredients[indexPath.row]
+        let selectedIngredient: Ingredient = ingredients[indexPath.row]
+        
+        let ingredient: Ingredient = Ingredient(category: selectedIngredient.category!, name: selectedIngredient.name!, ndbno: selectedIngredient.ndbno!)!
+        //ingredient = ingredients[indexPath.row]
         
         let ingredientDetailNavController: UINavigationController = UINavigationController(rootViewController: IngredientDetailController())
         

@@ -10,7 +10,7 @@ import UIKit
 
 class OnboardingViewController: UIViewController, UICollectionViewDataSource, UICollectionViewDelegate, UICollectionViewDelegateFlowLayout, UIScrollViewDelegate {
     
-    var homeController: HomeController?
+    //var homeController: HomeController?
     
     lazy var collectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()

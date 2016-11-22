@@ -42,7 +42,7 @@ class EditRecipeImageAndNameController: UIViewController, UIScrollViewDelegate, 
         }
         iv.contentMode = .scaleAspectFill
         iv.clipsToBounds = true
-        iv.backgroundColor = ColorPalette.BrandLightGrey
+        iv.backgroundColor = ColorPalette.BrandDarkBlue
         iv.translatesAutoresizingMaskIntoConstraints = false
         iv.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(imageOptionActionSheet)))
         iv.isUserInteractionEnabled = true
@@ -134,7 +134,7 @@ class EditRecipeImageAndNameController: UIViewController, UIScrollViewDelegate, 
         mainTitleTextView.returnKeyType = UIReturnKeyType.done
         
         
-        mainTitleTextView.addBottomBorderWithColor(color: .white, andWidth: 2)
+        mainTitleTextView.addBottomBorderWithColor(color: .white, andWidth: 1)
         mainTitleTextView.attributedText = addStrokeToString(text: mainTitleTextView.text)
     }
     

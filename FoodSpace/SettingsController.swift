@@ -25,7 +25,7 @@ class SettingsController: UIViewController {
         bv.addTarget(self, action: #selector(handleLogout), for: .touchUpInside)
         bv.translatesAutoresizingMaskIntoConstraints = false
         bv.setTitleColor(UIColor.white, for: .normal)
-        bv.backgroundColor = ColorPalette.BrandGrey
+        bv.backgroundColor = ColorPalette.BrandCloudy
         bv.setBackgroundImage(highlightedBackgroundImage, for: .highlighted)
         return bv
     }()
@@ -49,7 +49,7 @@ class SettingsController: UIViewController {
         buttonView.heightAnchor.constraint(equalToConstant: 30).isActive = true
         buttonView.widthAnchor.constraint(equalToConstant: 100).isActive = true
         
-        setupMenuBar()
+        //setupMenuBar()
     }
     
     lazy var menuBar: MenuBar = {
@@ -78,7 +78,7 @@ class SettingsController: UIViewController {
         let appDelegate = UIApplication.shared.delegate as! AppDelegate
         
         // home controller has a method that checks if the user is logged in... this is hacky and shitty
-        appDelegate.setNewRootView(newViewController: HomeController(), oldViewController: self)
+        appDelegate.setNewRootView(newViewController: CustomTabBarController(), oldViewController: self)
         
     }
 

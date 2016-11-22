@@ -309,12 +309,48 @@ struct Quantities {
         return list;
     }
     
-    static func getFractionStringFromDecimal(decimal: Double) -> String {
-        let approximation = rationalApproximationOf(x0: decimal);
+    static func getFractionStringFromDecimal(decimal: Double) -> (fractionString: String, wholeNumber: Int) {
+        // get decimals only
+        let _decimal = removeWholeNumberFromDecimal(decimal: decimal)
+        print(_decimal)
+        
+        let decimals = _decimal.decimals
+        let wholeNumber = _decimal.wholeNumber
+        
+        // no fraction to return if there are no decimal places
+        if (decimals == 0) {
+            return ("", wholeNumber)
+        }
+        
+        let approximation = rationalApproximationOf(x0: decimals);
         let numerator = approximation.num;
         let denominator = approximation.den;
         
-        return makeIntoFractionString(numerator: numerator, denominator: denominator);
+        return (makeIntoFractionString(numerator: numerator, denominator: denominator), wholeNumber);
+    }
+    
+    fileprivate static func removeWholeNumberFromDecimal(decimal: Double) -> (decimals: Double, wholeNumber: Int) {
+        var justDecimals: Double = Double(round(decimal)) - decimal
+        
+        // check if justDecimals is actually 0
+        if justDecimals == 0 {
+            return (0, Int(decimal));
+        }
+        print(justDecimals)
+        
+        var wholeNumber = Int((decimal) - justDecimals)
+        
+        if justDecimals < 0 {
+            justDecimals += 1
+            wholeNumber = Int((decimal + 1) - justDecimals)
+        }
+        
+        // make sure there even is a whole number, otherwise we're returning a 1 incorrectly
+        if (decimal < 1) {
+            wholeNumber = 0
+        }
+        
+        return (1 - justDecimals, wholeNumber)
     }
     
     
@@ -329,7 +365,7 @@ struct Quantities {
     
     typealias Rational = (num : Int, den : Int)
     
-    static func rationalApproximationOf(x0 : Double, withPrecision eps : Double = 1.0E-6) -> Rational {
+    fileprivate static func rationalApproximationOf(x0 : Double, withPrecision eps : Double = 1.0E-6) -> Rational {
         var x = x0
         var a = floor(x)
         var (h1, k1, h, k) = (1, 0, Int(a), 1)
